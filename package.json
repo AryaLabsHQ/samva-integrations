@@ -1,0 +1,40 @@
+{
+  "name": "samva-integrations",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Open-source integration packages and examples for Samva.",
+  "license": "MIT",
+  "author": "Arya Labs, Inc.",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "clean": "rm -rf node_modules .turbo coverage packages/*/dist examples/*/.next"
+  },
+  "devDependencies": {
+    "@tsconfig/bun": "^1.0.10",
+    "@types/bun": "^1.3.14",
+    "@typescript/native-preview": "^7.0.0-dev.20260624.1",
+    "oxfmt": "^0.54.0",
+    "oxlint": "^1.69.0",
+    "tsdown": "^0.16.7",
+    "turbo": "^2.9.18",
+    "vitest": "^4.1.8"
+  },
+  "engines": {
+    "bun": ">=1.3.2",
+    "node": ">=24.10.0"
+  },
+  "packageManager": "bun@1.3.2"
+}
