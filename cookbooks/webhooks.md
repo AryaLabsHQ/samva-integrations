@@ -124,8 +124,9 @@ exposes a raw `IncomingMessage`.
 The raw body is required. Do not call `req.json()`, use JSON middleware, or re-stringify a
 parsed object before verification.
 
-`tolerance` is opt-in and advisory. Samva signs the body, and the payload timestamp is useful for
-operational checks, but it is not a separate signed timestamp header.
+`tolerance` is opt-in and enforced. Samva signs the body (timestamp included), so when you pass a
+`tolerance` the verifier throws `TimestampToleranceError` for payloads whose timestamp falls outside
+the window.
 
 Handle duplicates idempotently by `messageId`. Webhook delivery is at-least-once, so repeated
 events should be safe to accept.
