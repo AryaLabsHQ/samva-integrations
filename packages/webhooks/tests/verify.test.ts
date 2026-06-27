@@ -202,4 +202,16 @@ describe("verify", () => {
       verify({ payload: body, signature: sign(body, secret), secret, tolerance: 60 }),
     ).rejects.toThrow(TimestampToleranceError);
   });
+
+  it("accepts and returns a webhook with an unknown (future) event type", async () => {
+    const secret = "whsec_test_samva_0123456789abcdef";
+    const body = JSON.stringify({
+      event: "future.event.type",
+      messageId: "msg_future",
+      timestamp: new Date().toISOString(),
+      data: {},
+    });
+    const event = await verify({ payload: body, signature: sign(body, secret), secret });
+    expect(event.event).toBe("future.event.type");
+  });
 });

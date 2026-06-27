@@ -19,7 +19,13 @@ export const SAMVA_WEBHOOK_EVENT_TYPES = [
 export type SamvaWebhookEventType = (typeof SAMVA_WEBHOOK_EVENT_TYPES)[number];
 
 export interface SamvaWebhookEvent {
-  event: SamvaWebhookEventType;
+  /**
+   * The event type — one of {@link SamvaWebhookEventType}, or any other string.
+   * Samva may add events, and unknown ones still parse and verify, so the type is
+   * widened to keep the verifier forward-compatible; handle unknown events with a
+   * `default` branch.
+   */
+  event: SamvaWebhookEventType | (string & {});
   messageId: string;
   timestamp: string;
   data: Record<string, unknown>;
