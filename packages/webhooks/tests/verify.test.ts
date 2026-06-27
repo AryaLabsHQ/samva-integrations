@@ -11,6 +11,7 @@ import {
   SignatureMismatchError,
   TimestampToleranceError,
   verify,
+  WebhookVerificationError,
 } from "../src/index.js";
 
 interface Fixture {
@@ -166,5 +167,39 @@ describe("verify", () => {
         tolerance: 60,
       }),
     ).resolves.toMatchObject({ messageId: "msg_fresh" });
+  });
+
+  it("throws a typed error when the signing secret is missing", async () => {
+    const secret = "whsec_test_samva_0123456789abcdef";
+    const body = JSON.stringify({
+      event: "message.delivered",
+      messageId: "msg_secret",
+      timestamp: new Date().toISOString(),
+      data: {},
+    });
+    await expect(
+      verify({ payload: body, signature: sign(body, secret), secret: "" }),
+    ).rejects.toThrow(WebhookVerificationError);
+  });
+
+  it("rejects a signed payload missing required fields", async () => {
+    const secret = "whsec_test_samva_0123456789abcdef";
+    const body = JSON.stringify({ event: "message.delivered", messageId: "msg_partial" });
+    await expect(verify({ payload: body, signature: sign(body, secret), secret })).rejects.toThrow(
+      MalformedPayloadError,
+    );
+  });
+
+  it("enforces tolerance even when the timestamp is unparsable", async () => {
+    const secret = "whsec_test_samva_0123456789abcdef";
+    const body = JSON.stringify({
+      event: "message.delivered",
+      messageId: "msg_badts",
+      timestamp: "not-a-date",
+      data: {},
+    });
+    await expect(
+      verify({ payload: body, signature: sign(body, secret), secret, tolerance: 60 }),
+    ).rejects.toThrow(TimestampToleranceError);
   });
 });

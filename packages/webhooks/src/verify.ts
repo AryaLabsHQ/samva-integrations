@@ -5,6 +5,7 @@ import {
   MissingSignatureError,
   SignatureMismatchError,
   TimestampToleranceError,
+  WebhookVerificationError,
 } from "./errors.js";
 import type { SamvaWebhookEvent } from "./events.js";
 import { samvaScheme } from "./scheme.js";
@@ -34,6 +35,11 @@ export async function verify(opts: {
   if (!opts.signature || !providedHex) {
     throw new MissingSignatureError();
   }
+  if (!opts.secret) {
+    throw new WebhookVerificationError(
+      "A webhook signing secret is required to verify the signature.",
+    );
+  }
 
   const enc = new TextEncoder();
   const material = samvaScheme.signedMaterial(opts.payload);
@@ -57,28 +63,33 @@ export async function verify(opts: {
   } catch {
     throw new MalformedPayloadError("Webhook payload is not valid JSON");
   }
+  if (parsed === null || typeof parsed !== "object") {
+    throw new MalformedPayloadError("Webhook payload is not an object");
+  }
+  const record = parsed as Record<string, unknown>;
   if (
-    parsed === null ||
-    typeof parsed !== "object" ||
-    typeof (parsed as Record<string, unknown>)["event"] !== "string" ||
-    typeof (parsed as Record<string, unknown>)["messageId"] !== "string"
+    typeof record["event"] !== "string" ||
+    typeof record["messageId"] !== "string" ||
+    typeof record["timestamp"] !== "string" ||
+    typeof record["data"] !== "object" ||
+    record["data"] === null
   ) {
     throw new MalformedPayloadError("Webhook payload missing required fields");
   }
   const event = parsed as SamvaWebhookEvent;
 
   if (opts.tolerance !== undefined && Number.isFinite(opts.tolerance)) {
-    const ts = (parsed as Record<string, unknown>)["timestamp"];
-    if (typeof ts === "string") {
-      const parsedTs = Date.parse(ts);
-      if (!Number.isNaN(parsedTs)) {
-        const ageSeconds = Math.abs(Date.now() - parsedTs) / 1000;
-        if (ageSeconds > opts.tolerance) {
-          throw new TimestampToleranceError(
-            `Webhook timestamp is ${ageSeconds.toFixed(0)}s old (tolerance: ${opts.tolerance}s)`,
-          );
-        }
-      }
+    const parsedTs = Date.parse(event.timestamp);
+    if (Number.isNaN(parsedTs)) {
+      throw new TimestampToleranceError(
+        "Webhook timestamp could not be parsed; cannot enforce the tolerance window.",
+      );
+    }
+    const ageSeconds = Math.abs(Date.now() - parsedTs) / 1000;
+    if (ageSeconds > opts.tolerance) {
+      throw new TimestampToleranceError(
+        `Webhook timestamp is ${ageSeconds.toFixed(0)}s old (tolerance: ${opts.tolerance}s)`,
+      );
     }
   }
 
