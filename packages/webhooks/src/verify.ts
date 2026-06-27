@@ -78,7 +78,12 @@ export async function verify(opts: {
   }
   const event = parsed as SamvaWebhookEvent;
 
-  if (opts.tolerance !== undefined && Number.isFinite(opts.tolerance)) {
+  if (opts.tolerance !== undefined) {
+    if (!Number.isFinite(opts.tolerance) || opts.tolerance < 0) {
+      throw new WebhookVerificationError(
+        "tolerance must be a non-negative, finite number of seconds.",
+      );
+    }
     const parsedTs = Date.parse(event.timestamp);
     if (Number.isNaN(parsedTs)) {
       throw new TimestampToleranceError(

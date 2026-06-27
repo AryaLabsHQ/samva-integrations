@@ -214,4 +214,17 @@ describe("verify", () => {
     const event = await verify({ payload: body, signature: sign(body, secret), secret });
     expect(event.event).toBe("future.event.type");
   });
+
+  it("rejects an invalid tolerance value instead of silently skipping the check", async () => {
+    const secret = "whsec_test_samva_0123456789abcdef";
+    const body = JSON.stringify({
+      event: "message.delivered",
+      messageId: "msg_badtol",
+      timestamp: new Date().toISOString(),
+      data: {},
+    });
+    await expect(
+      verify({ payload: body, signature: sign(body, secret), secret, tolerance: Number.NaN }),
+    ).rejects.toThrow(WebhookVerificationError);
+  });
 });
