@@ -1,0 +1,8 @@
+{
+  "description": "No signature header value",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.delivered\",\"messageId\":\"msg_missing_signature\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Missing signature\",\"recipient\":\"person@example.com\",\"status\":\"delivered\"}}",
+  "signature": "",
+  "expect": "error",
+  "errorType": "MissingSignatureError"
+}

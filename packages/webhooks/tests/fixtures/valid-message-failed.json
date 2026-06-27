@@ -1,0 +1,9 @@
+{
+  "description": "Valid message.failed webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.failed\",\"messageId\":\"msg_04\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Forwarded conversation 4\",\"recipient\":\"person-4@example.com\",\"status\":\"failed\"}}",
+  "signature": "sha256=cfff7d2553e9bdbafc227ff0f283d61ac997cb39f7452951df8b5cb16f55f5ba",
+  "expect": "pass",
+  "event": "message.failed",
+  "messageId": "msg_04"
+}

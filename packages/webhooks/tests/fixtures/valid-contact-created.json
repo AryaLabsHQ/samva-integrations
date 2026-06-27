@@ -1,0 +1,9 @@
+{
+  "description": "Valid contact.created webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"contact.created\",\"messageId\":\"msg_07\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"contactId\":\"contact_7\",\"email\":\"contact-7@example.com\",\"source\":\"inbox\"}}",
+  "signature": "sha256=e77c9bd7128aa8515d569f5c329191d5a4dd0b7eefb22c49821e95ab83152721",
+  "expect": "pass",
+  "event": "contact.created",
+  "messageId": "msg_07"
+}

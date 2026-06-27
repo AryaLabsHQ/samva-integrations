@@ -1,0 +1,8 @@
+{
+  "description": "Signature is valid but payload is not JSON",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "not json {",
+  "signature": "sha256=55f7497f6818582a069060fac5cb466e4c0578d6c7aef46caf146b15f54ddae1",
+  "expect": "error",
+  "errorType": "MalformedPayloadError"
+}

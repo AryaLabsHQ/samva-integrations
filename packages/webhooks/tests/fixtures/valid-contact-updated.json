@@ -1,0 +1,9 @@
+{
+  "description": "Valid contact.updated webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"contact.updated\",\"messageId\":\"msg_08\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"contactId\":\"contact_8\",\"email\":\"contact-8@example.com\",\"source\":\"inbox\"}}",
+  "signature": "sha256=14e519b1f7bc1ce3df207a7e84139879bcd13fa0c9f61c840a2f4833918a7b0e",
+  "expect": "pass",
+  "event": "contact.updated",
+  "messageId": "msg_08"
+}

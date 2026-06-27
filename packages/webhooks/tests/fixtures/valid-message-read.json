@@ -1,0 +1,9 @@
+{
+  "description": "Valid message.read webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.read\",\"messageId\":\"msg_03\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Forwarded conversation 3\",\"recipient\":\"person-3@example.com\",\"status\":\"read\"}}",
+  "signature": "sha256=a452a9d2782dafd170fc424d19c5ae9aa07e612cff07902e43a8281c606dbc78",
+  "expect": "pass",
+  "event": "message.read",
+  "messageId": "msg_03"
+}

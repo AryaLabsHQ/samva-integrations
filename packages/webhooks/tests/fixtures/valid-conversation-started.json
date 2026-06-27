@@ -1,0 +1,9 @@
+{
+  "description": "Valid conversation.started webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"conversation.started\",\"messageId\":\"msg_09\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"conversationId\":\"conversation_9\",\"lastMessageAt\":\"2026-06-25T12:00:00.000Z\"}}",
+  "signature": "sha256=2cee4d80439d6089b90a13b547d275d197a4d188aa79c185f4624a58eb461dda",
+  "expect": "pass",
+  "event": "conversation.started",
+  "messageId": "msg_09"
+}

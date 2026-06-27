@@ -1,0 +1,8 @@
+{
+  "description": "Body changed after signing",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.delivered\",\"messageId\":\"msg_tampered\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Changed subject\",\"recipient\":\"person@example.com\",\"status\":\"delivered\"}}",
+  "signature": "sha256=2893810d126e6e5fe2619b3f3d83a6294e64365a3c1122fa6761d05dcae45bd3",
+  "expect": "error",
+  "errorType": "SignatureMismatchError"
+}

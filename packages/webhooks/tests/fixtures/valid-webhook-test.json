@@ -1,0 +1,9 @@
+{
+  "description": "Valid webhook.test webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"webhook.test\",\"messageId\":\"msg_11\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"ok\":true,\"endpoint\":\"webhook-test\"}}",
+  "signature": "sha256=258a8a6f6c12c2477eedca3a6441766f95d4d209a2a000bf710caab329f2cb3b",
+  "expect": "pass",
+  "event": "webhook.test",
+  "messageId": "msg_11"
+}

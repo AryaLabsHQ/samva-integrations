@@ -1,0 +1,9 @@
+{
+  "description": "Valid message.delivered webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.delivered\",\"messageId\":\"msg_02\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Forwarded conversation 2\",\"recipient\":\"person-2@example.com\",\"status\":\"delivered\"}}",
+  "signature": "sha256=27a16ddc678b0b1bd74f2c6dc3242137729534304783fe90c7f3e14c96a13f1d",
+  "expect": "pass",
+  "event": "message.delivered",
+  "messageId": "msg_02"
+}

@@ -1,0 +1,9 @@
+{
+  "description": "Valid message.bounced webhook",
+  "secret": "whsec_test_samva_0123456789abcdef",
+  "body": "{\"event\":\"message.bounced\",\"messageId\":\"msg_05\",\"timestamp\":\"2026-06-25T12:00:00.000Z\",\"data\":{\"subject\":\"Forwarded conversation 5\",\"recipient\":\"person-5@example.com\",\"status\":\"bounced\"}}",
+  "signature": "sha256=1215df3e6ca94fd286b8b3e0d9d01bf55875ad07437571529806a8a4f6c57a05",
+  "expect": "pass",
+  "event": "message.bounced",
+  "messageId": "msg_05"
+}
