@@ -14,6 +14,8 @@ Each POST includes:
 
 ```http
 X-Webhook-Signature: sha256=<hex>
+X-Webhook-Event: message.delivered
+X-Webhook-Id: <endpoint id>
 ```
 
 The signature is an HMAC-SHA256 hex digest over the raw JSON request body using the endpoint
@@ -128,8 +130,9 @@ parsed object before verification.
 `tolerance` the verifier throws `TimestampToleranceError` for payloads whose timestamp falls outside
 the window.
 
-Handle duplicates idempotently by `messageId`. Webhook delivery is at-least-once, so repeated
-events should be safe to accept.
+Webhook delivery is at-least-once, so dedupe on `event` + `messageId` together — a single message
+emits several events (`message.sent`, `.delivered`, `.read`, …), so deduping on `messageId` alone
+would drop valid events. Add `timestamp` if the same event can legitimately recur.
 
 ## Provider webhooks
 
