@@ -1,0 +1,24 @@
+{
+  "name": "react-email-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Render a React Email template and send it with Samva — the \"samva\" entry in the React Email provider matrix.",
+  "type": "module",
+  "scripts": {
+    "dev": "email dev",
+    "export": "email export",
+    "send": "bun run src/send.tsx",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-email": "^6.6.5",
+    "samva": "link:samva"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}
