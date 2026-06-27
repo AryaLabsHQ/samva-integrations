@@ -22,6 +22,17 @@
         "@types/node": "^26.0.1",
       },
     },
+    "examples/webhooks-receiver": {
+      "name": "@samva/example-webhooks-receiver",
+      "version": "0.0.0",
+      "dependencies": {
+        "@samva/webhooks": "workspace:*",
+      },
+      "devDependencies": {
+        "@cloudflare/workers-types": "^4",
+        "wrangler": "^4",
+      },
+    },
   },
   "packages": {
     "@babel/generator": ["@babel/generator@7.29.7", "", { "dependencies": { "@babel/parser": "^7.29.7", "@babel/types": "^7.29.7", "@jridgewell/gen-mapping": "^0.3.12", "@jridgewell/trace-mapping": "^0.3.28", "jsesc": "^3.0.2" } }, "sha512-DkXD5OJQaAQIdZ1bt3UZdEnHAn9Imd3IVBdX03UFe+ony9Ojw5pzr9YVKGDY1jt+Gcn/FnGkNf8r+Vj5NOJWtQ=="],
