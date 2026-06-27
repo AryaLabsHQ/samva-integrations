@@ -1,0 +1,46 @@
+{
+  "name": "@samva/webhooks",
+  "version": "0.0.1",
+  "description": "Verify Samva webhook signatures. Edge-safe (WebCrypto), zero dependencies.",
+  "keywords": [
+    "edge",
+    "hmac",
+    "samva",
+    "signature",
+    "verification",
+    "webcrypto",
+    "webhook",
+    "webhooks"
+  ],
+  "license": "MIT",
+  "author": "Arya Labs, Inc.",
+  "files": [
+    "dist",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "import": "./dist/node.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1"
+  }
+}

@@ -15,6 +15,13 @@
         "vitest": "^4.1.8",
       },
     },
+    "packages/webhooks": {
+      "name": "@samva/webhooks",
+      "version": "0.0.1",
+      "devDependencies": {
+        "@types/node": "^26.0.1",
+      },
+    },
   },
   "packages": {
     "@babel/generator": ["@babel/generator@7.29.7", "", { "dependencies": { "@babel/parser": "^7.29.7", "@babel/types": "^7.29.7", "@jridgewell/gen-mapping": "^0.3.12", "@jridgewell/trace-mapping": "^0.3.28", "jsesc": "^3.0.2" } }, "sha512-DkXD5OJQaAQIdZ1bt3UZdEnHAn9Imd3IVBdX03UFe+ony9Ojw5pzr9YVKGDY1jt+Gcn/FnGkNf8r+Vj5NOJWtQ=="],
