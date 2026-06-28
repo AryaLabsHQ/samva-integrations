@@ -1,0 +1,39 @@
+{
+  "name": "@samva/ai-sdk",
+  "version": "0.0.0",
+  "description": "AI SDK tools for Samva.",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./mailbox": {
+      "types": "./dist/mailbox.d.mts",
+      "import": "./dist/mailbox.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch --ignore-watch .turbo",
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "devDependencies": {
+    "ai": "^5.0.113"
+  },
+  "peerDependencies": {
+    "ai": "^5.0.0"
+  }
+}
