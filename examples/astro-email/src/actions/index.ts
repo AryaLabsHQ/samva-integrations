@@ -1,6 +1,7 @@
 import { z } from "astro/zod";
 import { ActionError, defineAction } from "astro:actions";
 
+import { escapeHtml } from "../lib/html";
 import { samva } from "../lib/samva";
 
 const contactInput = z.object({
@@ -8,14 +9,6 @@ const contactInput = z.object({
   subject: z.string().min(1),
   message: z.string().min(1),
 });
-
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
 
 export const server = {
   send: defineAction({

@@ -1,16 +1,12 @@
 import type { APIRoute } from "astro";
+import { z } from "astro/zod";
 
+import { escapeHtml } from "../../lib/html";
 import { samva } from "../../lib/samva";
 
 export const prerender = false;
 
-const escapeHtml = (value: string) =>
-  value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+const emailInput = z.email();
 
 export const POST: APIRoute = async ({ request }) => {
   let body: unknown;
@@ -30,6 +26,7 @@ export const POST: APIRoute = async ({ request }) => {
     typeof body.email !== "string" ||
     typeof body.subject !== "string" ||
     typeof body.message !== "string" ||
+    !emailInput.safeParse(body.email).success ||
     body.email.length === 0 ||
     body.subject.length === 0 ||
     body.message.length === 0

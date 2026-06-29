@@ -139,10 +139,13 @@ posts JSON to your app.
 ```ts
 // src/pages/api/send.ts
 import type { APIRoute } from "astro";
+import { z } from "astro/zod";
 
 import { samva } from "../../lib/samva";
 
 export const prerender = false;
+
+const emailInput = z.email();
 
 const escapeHtml = (value: string) =>
   value
@@ -170,6 +173,7 @@ export const POST: APIRoute = async ({ request }) => {
     typeof body.email !== "string" ||
     typeof body.subject !== "string" ||
     typeof body.message !== "string" ||
+    !emailInput.safeParse(body.email).success ||
     body.email.length === 0 ||
     body.subject.length === 0 ||
     body.message.length === 0
@@ -266,7 +270,22 @@ export const POST: APIRoute = async ({ request }) => {
   // Warning: this example does not verify the signature. Do not trust events
   // from the public internet in production until you verify them with the
   // `samva/webhooks` helper.
-  const event = JSON.parse(rawBody);
+  let event: unknown;
+
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  if (
+    typeof event !== "object" ||
+    event === null ||
+    !("type" in event) ||
+    typeof event.type !== "string"
+  ) {
+    return Response.json({ error: "Webhook event type is required." }, { status: 400 });
+  }
 
   switch (event.type) {
     case "message.delivered":
