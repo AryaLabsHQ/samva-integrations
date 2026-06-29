@@ -95,6 +95,8 @@ import type { NextRequest } from "next/server";
 import WelcomeEmail from "../../../../emails/welcome";
 import { samva } from "../../../../lib/samva";
 
+export const runtime = "edge";
+
 export async function POST(request: NextRequest) {
   let event: Awaited<ReturnType<typeof verifyWebhook>>;
 
@@ -162,7 +164,7 @@ case "email.created": {
     channel: "email",
     email: {
       subject: event.data.subject ?? "Clerk email",
-      html: event.data.body ?? "",
+      html: event.data.body ?? undefined,
       text: event.data.body_plain ?? undefined,
     },
   });

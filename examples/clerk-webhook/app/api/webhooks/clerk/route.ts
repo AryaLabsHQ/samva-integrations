@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       // Custom-delivery mode: turn off "Delivered by Clerk" for a Clerk email template.
       // Clerk still renders the auth email, then Samva delivers it from your verified sender.
       const to = event.data.to_email_address;
-      const html = event.data.body ?? "";
+      const html = event.data.body ?? undefined;
       const text = event.data.body_plain ?? undefined;
 
       if (!to || (!html && !text)) {
