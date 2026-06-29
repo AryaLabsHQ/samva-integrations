@@ -1,0 +1,44 @@
+{
+  "name": "@samva/better-auth",
+  "version": "0.0.0",
+  "description": "Better Auth email callbacks powered by Samva.",
+  "license": "MIT",
+  "author": "Arya Labs, Inc.",
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts --format esm --dts",
+    "dev": "tsdown src/index.ts --format esm --dts --watch",
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "devDependencies": {
+    "@react-email/render": "^2.0.0",
+    "better-auth": "^1.7.0-beta.9",
+    "samva": "link:samva"
+  },
+  "peerDependencies": {
+    "@react-email/render": "^2.0.0",
+    "better-auth": "^1.7.0-beta.9",
+    "samva": "^0.1.0"
+  },
+  "peerDependenciesMeta": {
+    "@react-email/render": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
