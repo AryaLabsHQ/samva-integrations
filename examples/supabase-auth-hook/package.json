@@ -1,0 +1,26 @@
+{
+  "name": "supabase-auth-hook-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Supabase Auth Send Email Hook example that verifies Standard Webhooks signatures and sends through Samva.",
+  "type": "module",
+  "scripts": {
+    "build": "deno task typecheck",
+    "smoke": "deno task typecheck",
+    "test": "vitest run supabase/functions/send-email",
+    "typecheck": "tsgo --noEmit --project tsconfig.json && deno task typecheck"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-email": "^6.6.5",
+    "samva": "link:samva",
+    "standardwebhooks": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "vitest": "^4.1.8"
+  }
+}

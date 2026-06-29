@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": "user_magic",
+    "email": "magic@example.com"
+  },
+  "email_data": {
+    "token": "333333",
+    "token_hash": "magic-token-hash",
+    "redirect_to": "https://app.example.com/dashboard",
+    "email_action_type": "magiclink",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": "user_invite",
+    "email": "invitee@example.com"
+  },
+  "email_data": {
+    "token": "222222",
+    "token_hash": "invite-token-hash",
+    "redirect_to": "https://app.example.com/invite",
+    "email_action_type": "invite",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

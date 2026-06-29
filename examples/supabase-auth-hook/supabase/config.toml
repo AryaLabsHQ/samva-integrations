@@ -1,0 +1,6 @@
+project_id = "samva-supabase-auth-hook"
+
+[auth.hook.send_email]
+enabled = true
+uri = "http://host.docker.internal:54321/functions/v1/send-email"
+secrets = "env(SEND_EMAIL_HOOK_SECRET)"
