@@ -11,5 +11,5 @@ export default defineConfig({
     "eslint/no-unused-vars": "warn",
     "typescript/no-extraneous-class": "off",
   },
-  ignorePatterns: ["node_modules", "dist", "coverage", ".turbo", "*.d.ts"],
+  ignorePatterns: ["node_modules", "dist", "coverage", ".turbo", "**/.next", "*.d.ts"],
 });

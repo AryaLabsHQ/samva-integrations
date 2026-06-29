@@ -1,0 +1,26 @@
+{
+  "name": "better-auth-nextjs-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Next.js Better Auth route handler that sends auth email through Samva.",
+  "type": "module",
+  "scripts": {
+    "build": "SAMVA_API_KEY=sk_sm_build_placeholder BETTER_AUTH_SECRET=build-secret-at-least-32-characters BETTER_AUTH_URL=http://localhost:3000 next build --webpack",
+    "dev": "next dev",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/memory-adapter": "^1.7.0-rc.0",
+    "@samva/better-auth": "workspace:*",
+    "better-auth": "^1.7.0-beta.9",
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "samva": "link:samva"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}

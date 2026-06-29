@@ -9,5 +9,5 @@ export default defineConfig({
   trailingComma: "all",
   sortImports: {},
   sortPackageJson: {},
-  ignorePatterns: ["**/dist", "**/coverage", "**/.turbo", "node_modules"],
+  ignorePatterns: ["**/dist", "**/coverage", "**/.next", "**/.turbo", ".claude", "node_modules"],
 });
