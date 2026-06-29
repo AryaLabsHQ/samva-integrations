@@ -231,8 +231,9 @@ extensions are not global.
 
 Caveats:
 
-- A thrown send error surfaces to the caller of `prisma.order.create()`. Catch it
-  if email failure must not fail the write path.
+- The example catches send failures so `prisma.order.create()` can still return
+  the committed row. Remove that catch if delivery failure should fail the write
+  path.
 - Query extensions wrap the individual operation. They are not commit-aware for
   an interactive `$transaction`; when correctness matters, send after the
   transaction resolves in app code.
@@ -261,12 +262,12 @@ Prisma version split:
 Example shape:
 
 ```ts
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { Pool } from "@neondatabase/serverless";
 import { PrismaClient } from "@/app/generated/prisma/client";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaNeon(pool);
 
 export const prisma = new PrismaClient({ adapter });
 ```
