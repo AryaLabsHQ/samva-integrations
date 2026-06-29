@@ -168,12 +168,16 @@ import { z } from "zod";
 
 import { getSamva } from "~/lib/samva";
 
-const sendRouteInput = z.object({
-  to: z.string().email(),
-  subject: z.string().min(1),
-  html: z.string().min(1).optional(),
-  text: z.string().min(1).optional(),
-});
+const sendRouteInput = z
+  .object({
+    to: z.string().email(),
+    subject: z.string().min(1),
+    html: z.string().min(1).optional(),
+    text: z.string().min(1).optional(),
+  })
+  .refine((value) => value.html || value.text, {
+    message: "html or text is required",
+  });
 
 const escapeHtml = (value: string) =>
   value
@@ -187,6 +191,15 @@ export const Route = createFileRoute("/api/send")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const sendToken = process.env.SAMVA_SEND_TOKEN;
+        if (!sendToken) {
+          return Response.json({ error: "Send endpoint token is not configured" }, { status: 500 });
+        }
+
+        if (request.headers.get("authorization") !== `Bearer ${sendToken}`) {
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const payload = await request.json().catch(() => null);
         const parsed = sendRouteInput.safeParse(payload);
         if (!parsed.success) {
@@ -194,14 +207,19 @@ export const Route = createFileRoute("/api/send")({
         }
 
         const body = parsed.data;
-        const text = body.text ?? "";
-        const html = body.html ?? `<p>${escapeHtml(text).replaceAll("\n", "<br />")}</p>`;
+        const text = body.text;
+        const html =
+          body.html ?? (text ? `<p>${escapeHtml(text).replaceAll("\n", "<br />")}</p>` : undefined);
         const samva = getSamva();
 
         await samva.messages.send({
           to: [{ email: body.to }],
           channel: "email",
-          email: { subject: body.subject, html, text },
+          email: {
+            subject: body.subject,
+            ...(html ? { html } : {}),
+            ...(text ? { text } : {}),
+          },
         });
 
         return Response.json({ ok: true });
@@ -211,9 +229,10 @@ export const Route = createFileRoute("/api/send")({
 });
 ```
 
-A server function is already an RPC endpoint. Enforce auth and rate limits inside
-the server function handler, middleware, or server route handler; do not rely on
-a UI route `beforeLoad` to protect a mutation.
+A server function is already an RPC endpoint. Keep the bearer-token check,
+replace it with your session middleware, and add rate limits before accepting
+production traffic; do not rely on a UI route `beforeLoad` to protect a
+mutation.
 
 TanStack Start also exposes request/response helpers from
 `@tanstack/react-start/server`, such as `getRequestHeader()` and

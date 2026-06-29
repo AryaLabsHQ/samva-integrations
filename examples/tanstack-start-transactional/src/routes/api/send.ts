@@ -26,6 +26,15 @@ export const Route = createFileRoute("/api/send")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const sendToken = process.env.SAMVA_SEND_TOKEN;
+        if (!sendToken) {
+          return Response.json({ error: "Send endpoint token is not configured" }, { status: 500 });
+        }
+
+        if (request.headers.get("authorization") !== `Bearer ${sendToken}`) {
+          return Response.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const payload = await request.json().catch(() => null);
         const parsed = sendRouteInput.safeParse(payload);
         if (!parsed.success) {
@@ -33,8 +42,9 @@ export const Route = createFileRoute("/api/send")({
         }
 
         const body = parsed.data;
-        const text = body.text ?? "";
-        const html = body.html ?? `<p>${escapeHtml(text).replaceAll("\n", "<br />")}</p>`;
+        const text = body.text;
+        const html =
+          body.html ?? (text ? `<p>${escapeHtml(text).replaceAll("\n", "<br />")}</p>` : undefined);
         const samva = getSamva();
 
         await samva.messages.send({
@@ -42,8 +52,8 @@ export const Route = createFileRoute("/api/send")({
           channel: "email",
           email: {
             subject: body.subject,
-            html,
-            text,
+            ...(html ? { html } : {}),
+            ...(text ? { text } : {}),
           },
         });
 

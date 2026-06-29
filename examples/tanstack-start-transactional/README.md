@@ -15,8 +15,8 @@ bun install
 cp examples/tanstack-start-transactional/.env.example examples/tanstack-start-transactional/.env
 ```
 
-Add a real `SAMVA_API_KEY` in `.env`. The key is server-only and intentionally
-does not use a `VITE_` prefix.
+Add a real `SAMVA_API_KEY` and a random `SAMVA_SEND_TOKEN` in `.env`. Both are
+server-only and intentionally do not use a `VITE_` prefix.
 
 Your Samva account must have a verified sender/domain before production sends
 will deliver.
@@ -33,6 +33,7 @@ Open `http://localhost:3000` and submit the form.
 
 ```sh
 curl -X POST http://localhost:3000/api/send \
+  -H "Authorization: Bearer replace-with-a-random-route-token" \
   -H "Content-Type: application/json" \
   -d '{
     "to": "ada@example.com",
