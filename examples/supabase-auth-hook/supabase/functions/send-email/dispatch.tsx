@@ -17,16 +17,14 @@ export async function dispatchSupabaseAuthEmail(
 ): Promise<void> {
   const targets = deliveryTargetsForEmailData(payload.user, payload.email_data, env);
 
-  await Promise.all(
-    targets.map(async (target) => {
-      const rendered = await renderForAction(payload.email_data, payload.user, target);
-      await client.messages.send({
-        to: [{ email: target.email }],
-        channel: "email",
-        email: rendered,
-      });
-    }),
-  );
+  for (const target of targets) {
+    const rendered = await renderForAction(payload.email_data, payload.user, target);
+    await client.messages.send({
+      to: [{ email: target.email }],
+      channel: "email",
+      email: rendered,
+    });
+  }
 }
 
 export async function renderForAction(

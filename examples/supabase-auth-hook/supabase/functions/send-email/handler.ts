@@ -1,4 +1,5 @@
 import { dispatchSupabaseAuthEmail } from "./dispatch.tsx";
+import { getRequiredEnv } from "./env.ts";
 import type { HookEnv, SamvaClient } from "./types.ts";
 import { verifySupabaseSendEmailHook } from "./verify.ts";
 
@@ -11,6 +12,12 @@ export function createSendEmailHookHandler(options: SendEmailHookHandlerOptions)
   return async function handleSendEmailHook(request: Request): Promise<Response> {
     if (request.method !== "POST") {
       return new Response("method not allowed", { status: 405 });
+    }
+
+    try {
+      getRequiredEnv(options.env, "SEND_EMAIL_HOOK_SECRET");
+    } catch {
+      return new Response("missing webhook secret", { status: 500 });
     }
 
     let payload;

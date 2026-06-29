@@ -78,7 +78,14 @@ so `JSON.parse` must happen after verification.
 import { Webhook } from "standardwebhooks";
 
 function normalizeSupabaseWebhookSecret(secret: string): string {
-  return secret.replace("v1,whsec_", "").replace("whsec_", "");
+  const trimmed = secret.trim();
+  if (trimmed.startsWith("v1,whsec_")) {
+    return trimmed.slice("v1,whsec_".length);
+  }
+  if (trimmed.startsWith("whsec_")) {
+    return trimmed.slice("whsec_".length);
+  }
+  return trimmed;
 }
 
 async function verifyRequest(request: Request, secret: string) {

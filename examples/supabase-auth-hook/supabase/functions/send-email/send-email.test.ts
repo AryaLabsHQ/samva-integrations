@@ -208,6 +208,20 @@ describe("Supabase Auth Send Email Hook example", () => {
     expect(calls).toHaveLength(1);
   });
 
+  it("returns 500 when the webhook signing secret is not configured", async () => {
+    const { calls, client } = fakeClient();
+    const handler = createSendEmailHookHandler({
+      client,
+      env: { ...env, SEND_EMAIL_HOOK_SECRET: "" },
+    });
+
+    const response = await handler(signedRequest(fixture("signup")));
+
+    expect(response.status).toBe(500);
+    expect(await response.text()).toBe("missing webhook secret");
+    expect(calls).toHaveLength(0);
+  });
+
   it("fails loudly for unsupported email_action_type values", async () => {
     const { calls, client } = fakeClient();
 
