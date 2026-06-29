@@ -225,17 +225,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
 
-  const result = await samva.messages.send({
-    to: [{ email }],
-    channel: "email",
-    email: {
-      subject: "Thanks for contacting us",
-      html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
-      text: `Thanks for reaching out.\n\n${message}`,
-    },
-  });
+  try {
+    const result = await samva.messages.send({
+      to: [{ email }],
+      channel: "email",
+      email: {
+        subject: "Thanks for contacting us",
+        html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
+        text: `Thanks for reaching out.\n\n${message}`,
+      },
+    });
 
-  return res.status(200).json({ ok: true, result });
+    return res.status(200).json({ ok: true, result });
+  } catch {
+    return res.status(502).json({ ok: false, error: "failed to send email" });
+  }
 }
 ```
 
