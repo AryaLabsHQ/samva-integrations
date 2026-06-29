@@ -19,6 +19,7 @@ export default defineConfig({
     "**/.next",
     "**/.output",
     "**/routeTree.gen.ts",
+    "**/.wrangler",
     "*.d.ts",
   ],
 });
