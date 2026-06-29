@@ -31,6 +31,7 @@ export const auth = betterAuth(
     },
     {
       apiKey: process.env.SAMVA_API_KEY!,
+      appUrl: process.env.BETTER_AUTH_URL!,
       plugins: {
         emailOTP: true,
         magicLink: true,
@@ -76,6 +77,9 @@ Default templates exist for all eight Better Auth email triggers:
 - `twoFactorOtp`
 - `magicLink`
 - `organizationInvitation`
+
+Set `appUrl` when you use the default `organizationInvitation` template so the
+accept-invitation link is absolute.
 
 Override only the templates you need:
 

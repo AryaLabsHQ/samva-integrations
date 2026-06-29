@@ -118,6 +118,7 @@ export type SamvaTemplates = {
 };
 
 export type SamvaBetterAuthOptions = SamvaClientInput & {
+  readonly appUrl?: string;
   readonly templates?: SamvaTemplates;
 };
 

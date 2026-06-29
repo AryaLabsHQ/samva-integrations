@@ -16,6 +16,7 @@ export const auth = betterAuth(
     },
     {
       apiKey: process.env.SAMVA_API_KEY!,
+      appUrl: process.env.BETTER_AUTH_URL!,
       plugins: {
         emailOTP: true,
       },
@@ -52,6 +53,9 @@ export const auth = betterAuth({
 Default HTML templates are included. Override any trigger with a function that
 returns HTML, `{ subject, html, text }`, or a React Email element. React Email
 rendering requires `@react-email/render` in your app.
+
+Set `appUrl` when you use the default organization invitation template so accept
+links are absolute in email clients.
 
 ```ts
 samvaEmail({

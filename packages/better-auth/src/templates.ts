@@ -21,6 +21,8 @@ const linkEmail = (subject: string, text: string, url: string): SamvaRenderedEma
   text: `${text}\n\n${url}`,
 });
 
+const appUrlWithoutTrailingSlash = (appUrl: string): string => appUrl.replace(/\/+$/, "");
+
 export const defaultSubjects = {
   verification: "Verify your email",
   resetPassword: "Reset your password",
@@ -53,16 +55,9 @@ export const defaultTemplates = {
   }),
   magicLink: ({ url }: SamvaEmailDataByTrigger["magicLink"]) =>
     linkEmail(defaultSubjects.magicLink, "Use this magic link to sign in.", url),
-  organizationInvitation: ({
-    id,
-    organization,
-  }: SamvaEmailDataByTrigger["organizationInvitation"]) => {
-    const orgName = organization.name || organization.slug || "the organization";
-    const url = `/organization/accept-invitation?id=${encodeURIComponent(id)}`;
-    return linkEmail(
-      defaultSubjects.organizationInvitation,
-      `Accept your invitation to ${orgName}.`,
-      url,
+  organizationInvitation: () => {
+    throw new Error(
+      "Use renderTemplate with appUrl or provide templates.organizationInvitation to render Better Auth organization invitations.",
     );
   },
 } satisfies {
@@ -101,8 +96,27 @@ export async function renderTemplate<Trigger extends SamvaEmailTrigger>(
   trigger: Trigger,
   data: SamvaEmailDataByTrigger[Trigger],
   templates: SamvaTemplates | undefined,
+  appUrl?: string,
 ): Promise<SamvaRenderedEmail> {
-  const template = (templates?.[trigger] ?? defaultTemplates[trigger]) as SamvaTemplate<Trigger>;
+  const configuredTemplate = templates?.[trigger];
+  if (!configuredTemplate && trigger === "organizationInvitation") {
+    if (!appUrl) {
+      throw new Error(
+        "Set appUrl or provide templates.organizationInvitation to send Better Auth organization invitations.",
+      );
+    }
+
+    const invitation = data as SamvaEmailDataByTrigger["organizationInvitation"];
+    const orgName =
+      invitation.organization.name || invitation.organization.slug || "the organization";
+    return linkEmail(
+      defaultSubjects.organizationInvitation,
+      `Accept your invitation to ${orgName}.`,
+      `${appUrlWithoutTrailingSlash(appUrl)}/organization/accept-invitation?id=${encodeURIComponent(invitation.id)}`,
+    );
+  }
+
+  const template = (configuredTemplate ?? defaultTemplates[trigger]) as SamvaTemplate<Trigger>;
   const output = await template(data);
 
   if (typeof output === "string") {

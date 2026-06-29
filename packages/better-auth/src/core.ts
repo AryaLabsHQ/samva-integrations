@@ -32,7 +32,7 @@ export async function renderAndSend<Trigger extends SamvaEmailTrigger>(
     throw new Error(`Cannot send ${trigger} email without a recipient email address.`);
   }
 
-  const rendered = await renderTemplate(trigger, data, options.templates);
+  const rendered = await renderTemplate(trigger, data, options.templates, options.appUrl);
   if (!rendered.html.trim()) {
     throw new Error(`Cannot send ${trigger} email with an empty HTML body.`);
   }

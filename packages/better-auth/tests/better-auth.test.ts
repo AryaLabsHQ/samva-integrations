@@ -78,7 +78,7 @@ describe("@samva/better-auth", () => {
 
   it("exposes callback fragments for every Better Auth email trigger", async () => {
     const { client, calls } = fakeClient();
-    const fragments = samvaEmail({ client });
+    const fragments = samvaEmail({ client, appUrl: "https://app.example.com" });
 
     await fragments.emailVerification.sendVerificationEmail({
       user,
@@ -131,6 +131,9 @@ describe("@samva/better-auth", () => {
       "magic@example.com",
       "invite@example.com",
     ]);
+    expect(calls.at(-1)?.email.html).toContain(
+      "https://app.example.com/organization/accept-invitation?id=inv_123",
+    );
   });
 
   it("adds enabled Better Auth plugins without clobbering existing callbacks", () => {
@@ -177,6 +180,23 @@ describe("@samva/better-auth", () => {
       subject: "Your verification code",
       html: "<p>123456</p>",
     });
+  });
+
+  it("requires appUrl for the default organization invitation template", async () => {
+    await expect(
+      renderTemplate(
+        "organizationInvitation",
+        {
+          id: "inv_123",
+          role: "member",
+          email: "invite@example.com",
+          organization: { name: "Acme" },
+          invitation: {},
+          inviter: { user },
+        },
+        undefined,
+      ),
+    ).rejects.toThrow("Set appUrl");
   });
 
   it("keeps the transformer return type assignable to the input config", () => {

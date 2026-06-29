@@ -18,6 +18,7 @@ export const auth = betterAuth(
     },
     {
       client: createClient({ apiKey }),
+      appUrl: process.env.BETTER_AUTH_URL!,
       plugins: {
         emailOTP: true,
       },
