@@ -1,0 +1,18 @@
+{
+  "name": "ai-sdk-mailbox-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "start": "bun src/index.ts"
+  },
+  "dependencies": {
+    "@ai-sdk/openai": "^2.0.23",
+    "@samva/ai-sdk": "workspace:*",
+    "ai": "^5.0.113"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "typescript": "^5.9.2"
+  }
+}

@@ -13,6 +13,16 @@ conversation-aware email workflows.
 - `examples/*` — complete, runnable example apps.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
 
+## Packages
+
+- `@samva/ai-sdk` — AI SDK-compatible Samva tools, including
+  `@samva/ai-sdk/mailbox` for programmable mailbox read, draft, and
+  approval-aware send tools.
+
+## Cookbooks
+
+- [`AI SDK Mailbox Tools`](./cookbooks/ai-sdk-mailbox.md)
+
 Integrations land as individual pull requests. See
 [CONTRIBUTING.md](./CONTRIBUTING.md) to propose or build one.
 
