@@ -1,4 +1,10 @@
-export type Awaitable<T> = T | Promise<T>;
+import type { Awaitable, BetterAuthOptions } from "better-auth";
+import type {
+  EmailOTPOptions,
+  MagicLinkOptions,
+  OrganizationOptions,
+  TwoFactorOptions,
+} from "better-auth/plugins";
 
 export type SamvaClient = {
   readonly messages: {
@@ -26,60 +32,45 @@ export type SamvaClientInput =
       readonly client?: never;
     };
 
-export type BetterAuthUser = {
-  readonly id?: string;
-  readonly name?: string | null;
-  readonly email: string;
-};
+type CallbackData<Callback> = Callback extends (data: infer Data, ...args: infer _Rest) => unknown
+  ? Data
+  : never;
 
-export type VerificationEmailData = {
-  readonly user: BetterAuthUser;
-  readonly url: string;
-  readonly token: string;
-};
+export type VerificationEmailData = CallbackData<
+  NonNullable<NonNullable<BetterAuthOptions["emailVerification"]>["sendVerificationEmail"]>
+>;
 
-export type ResetPasswordData = VerificationEmailData;
+export type ResetPasswordData = CallbackData<
+  NonNullable<NonNullable<BetterAuthOptions["emailAndPassword"]>["sendResetPassword"]>
+>;
 
-export type ChangeEmailData = {
-  readonly user: BetterAuthUser;
-  readonly newEmail: string;
-  readonly url: string;
-  readonly token: string;
-};
+export type ChangeEmailData = CallbackData<
+  NonNullable<
+    NonNullable<
+      NonNullable<BetterAuthOptions["user"]>["changeEmail"]
+    >["sendChangeEmailConfirmation"]
+  >
+>;
 
-export type DeleteAccountData = VerificationEmailData;
+export type DeleteAccountData = CallbackData<
+  NonNullable<
+    NonNullable<
+      NonNullable<BetterAuthOptions["user"]>["deleteUser"]
+    >["sendDeleteAccountVerification"]
+  >
+>;
 
-export type EmailOtpData = {
-  readonly email: string;
-  readonly otp: string;
-  readonly type: "sign-in" | "email-verification" | "forget-password" | "change-email";
-};
+export type EmailOtpData = CallbackData<EmailOTPOptions["sendVerificationOTP"]>;
 
-export type TwoFactorOtpData = {
-  readonly user: BetterAuthUser;
-  readonly otp: string;
-};
+export type TwoFactorOtpData = CallbackData<
+  NonNullable<NonNullable<TwoFactorOptions["otpOptions"]>["sendOTP"]>
+>;
 
-export type MagicLinkData = {
-  readonly email: string;
-  readonly url: string;
-  readonly token: string;
-  readonly metadata?: Record<string, unknown>;
-};
+export type MagicLinkData = CallbackData<MagicLinkOptions["sendMagicLink"]>;
 
-export type OrganizationInvitationData = {
-  readonly id: string;
-  readonly role: string;
-  readonly email: string;
-  readonly organization: {
-    readonly name?: string | null;
-    readonly slug?: string | null;
-  };
-  readonly invitation: unknown;
-  readonly inviter: {
-    readonly user?: BetterAuthUser;
-  };
-};
+export type OrganizationInvitationData = CallbackData<
+  NonNullable<OrganizationOptions["sendInvitationEmail"]>
+>;
 
 export type SamvaEmailDataByTrigger = {
   readonly verification: VerificationEmailData;

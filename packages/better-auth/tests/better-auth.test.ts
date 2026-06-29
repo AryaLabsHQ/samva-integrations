@@ -1,3 +1,10 @@
+import type { BetterAuthOptions } from "better-auth";
+import type {
+  EmailOTPOptions,
+  MagicLinkOptions,
+  OrganizationOptions,
+  TwoFactorOptions,
+} from "better-auth/plugins";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
@@ -5,10 +12,53 @@ import {
   renderTemplate,
   samvaEmail,
   type SamvaClient,
+  type SamvaEmailDataByTrigger,
   withSamva,
 } from "../src/index";
 
-const user = { id: "user_123", email: "ada@example.com", name: "Ada" };
+const date = new Date("2026-01-01T00:00:00.000Z");
+const user = {
+  id: "user_123",
+  email: "ada@example.com",
+  emailVerified: true,
+  name: "Ada",
+  createdAt: date,
+  updatedAt: date,
+} satisfies SamvaEmailDataByTrigger["verification"]["user"];
+const twoFactorUser = {
+  ...user,
+  twoFactorEnabled: true,
+} satisfies SamvaEmailDataByTrigger["twoFactorOtp"]["user"];
+
+const organizationInvitation = {
+  id: "inv_123",
+  role: "member",
+  email: "invite@example.com",
+  organization: {
+    id: "org_123",
+    name: "Acme",
+    slug: "acme",
+    createdAt: date,
+  },
+  invitation: {
+    id: "inv_123",
+    organizationId: "org_123",
+    email: "invite@example.com",
+    role: "member",
+    status: "pending",
+    inviterId: user.id,
+    expiresAt: date,
+    createdAt: date,
+  },
+  inviter: {
+    id: "member_123",
+    organizationId: "org_123",
+    userId: user.id,
+    role: "owner",
+    createdAt: date,
+    user,
+  },
+} satisfies SamvaEmailDataByTrigger["organizationInvitation"];
 
 function fakeClient() {
   const calls: Array<Parameters<SamvaClient["messages"]["send"]>[0]> = [];
@@ -106,20 +156,13 @@ describe("@samva/better-auth", () => {
       otp: "123456",
       type: "sign-in",
     });
-    await fragments.plugins.twoFactor.otpOptions.sendOTP({ user, otp: "654321" });
+    await fragments.plugins.twoFactor.otpOptions.sendOTP({ user: twoFactorUser, otp: "654321" });
     await fragments.plugins.magicLink.sendMagicLink({
       email: "magic@example.com",
       url: "https://app.example.com/magic",
       token: "m",
     });
-    await fragments.plugins.organization.sendInvitationEmail({
-      id: "inv_123",
-      role: "member",
-      email: "invite@example.com",
-      organization: { name: "Acme" },
-      invitation: {},
-      inviter: { user },
-    });
+    await fragments.plugins.organization.sendInvitationEmail(organizationInvitation);
 
     expect(calls.map((call) => call.to[0]?.email)).toEqual([
       "ada@example.com",
@@ -184,18 +227,7 @@ describe("@samva/better-auth", () => {
 
   it("requires appUrl for the default organization invitation template", async () => {
     await expect(
-      renderTemplate(
-        "organizationInvitation",
-        {
-          id: "inv_123",
-          role: "member",
-          email: "invite@example.com",
-          organization: { name: "Acme" },
-          invitation: {},
-          inviter: { user },
-        },
-        undefined,
-      ),
+      renderTemplate("organizationInvitation", organizationInvitation, undefined),
     ).rejects.toThrow("Set appUrl");
   });
 
@@ -206,6 +238,49 @@ describe("@samva/better-auth", () => {
     const transformed = withSamva(config, { client: fakeClient().client });
 
     expectTypeOf(transformed).toMatchTypeOf(config);
+  });
+
+  it("keeps template payload types aligned with Better Auth callbacks", () => {
+    expectTypeOf<SamvaEmailDataByTrigger["verification"]>().toEqualTypeOf<
+      Parameters<
+        NonNullable<NonNullable<BetterAuthOptions["emailVerification"]>["sendVerificationEmail"]>
+      >[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["resetPassword"]>().toEqualTypeOf<
+      Parameters<
+        NonNullable<NonNullable<BetterAuthOptions["emailAndPassword"]>["sendResetPassword"]>
+      >[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["changeEmail"]>().toEqualTypeOf<
+      Parameters<
+        NonNullable<
+          NonNullable<
+            NonNullable<BetterAuthOptions["user"]>["changeEmail"]
+          >["sendChangeEmailConfirmation"]
+        >
+      >[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["deleteAccount"]>().toEqualTypeOf<
+      Parameters<
+        NonNullable<
+          NonNullable<
+            NonNullable<BetterAuthOptions["user"]>["deleteUser"]
+          >["sendDeleteAccountVerification"]
+        >
+      >[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["emailOtp"]>().toEqualTypeOf<
+      Parameters<EmailOTPOptions["sendVerificationOTP"]>[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["twoFactorOtp"]>().toEqualTypeOf<
+      Parameters<NonNullable<NonNullable<TwoFactorOptions["otpOptions"]>["sendOTP"]>>[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["magicLink"]>().toEqualTypeOf<
+      Parameters<MagicLinkOptions["sendMagicLink"]>[0]
+    >();
+    expectTypeOf<SamvaEmailDataByTrigger["organizationInvitation"]>().toEqualTypeOf<
+      Parameters<NonNullable<OrganizationOptions["sendInvitationEmail"]>>[0]
+    >();
   });
 
   it("fails loudly when the recipient email is empty", async () => {
