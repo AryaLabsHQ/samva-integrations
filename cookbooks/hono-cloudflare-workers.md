@@ -115,7 +115,10 @@ app.post("/send", async (c) => {
   });
 
   if (error) {
-    return c.json({ ok: false, error }, 502);
+    return c.json(
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      502,
+    );
   }
 
   return c.json({ ok: true, id: data?.id });
@@ -208,9 +211,14 @@ const app = new Hono<{ Bindings: Bindings }>();
 
 app.post("/welcome", async (c) => {
   const html = await render(<WelcomeEmail name="Ada" />);
-  const samva = createClient({ apiKey: c.env.SAMVA_API_KEY });
 
-  await samva.messages.send({
+  const apiKey = c.env.SAMVA_API_KEY;
+  if (!apiKey) {
+    throw new Error("SAMVA_API_KEY is not configured for this Worker.");
+  }
+
+  const samva = createClient({ apiKey });
+  const { data, error } = await samva.messages.send({
     to: [{ email: "ada@example.com" }],
     channel: "email",
     email: {
@@ -220,7 +228,14 @@ app.post("/welcome", async (c) => {
     },
   });
 
-  return c.json({ ok: true });
+  if (error) {
+    return c.json(
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      502,
+    );
+  }
+
+  return c.json({ ok: true, id: data?.id });
 });
 ```
 
