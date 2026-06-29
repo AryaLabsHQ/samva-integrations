@@ -1,15 +1,9 @@
 import { tool } from "ai";
+import { createClient, type SamvaClient, type SamvaClientConfig } from "samva";
 import { z } from "zod";
 
-export type SamvaMailboxToolResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; status: number; error: string; details?: unknown };
-
-export type SamvaMailboxClientConfig = {
-  apiKey: string;
+export type SamvaMailboxClientConfig = SamvaClientConfig & {
   mailboxId: string;
-  baseUrl?: string;
-  fetch?: typeof fetch;
 };
 
 export type SamvaMailboxToolCapabilities = {
@@ -35,140 +29,22 @@ export type SamvaMailboxThreadListQuery = {
   limit?: number | undefined;
 };
 
-export type SamvaMailboxActionType =
-  | "sendMessage"
-  | "reply"
-  | "updateDraft"
-  | "createNote"
-  | "assignThread"
-  | "changeThreadState"
-  | "call"
-  | "extensionRequest";
-
-export type SamvaMailboxActionProposalResponse =
-  | { status: "accepted"; action: Record<string, unknown> }
-  | { status: "approvalRequired"; action: Record<string, unknown>; reason: string }
-  | { status: "denied"; action: Record<string, unknown>; reason: string };
-
-const DEFAULT_BASE_URL = "https://api.samva.app";
-
-const joinUrl = (baseUrl: string, path: string) =>
-  `${baseUrl.replace(/\/+$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
-
-const encodeQuery = (query: Record<string, string | number | undefined>) => {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (value !== undefined) params.set(key, String(value));
-  }
-  const encoded = params.toString();
-  return encoded ? `?${encoded}` : "";
+export type SamvaMailboxClient = {
+  mailboxId: string;
+  mailboxes: SamvaClient["mailboxes"];
 };
 
-const readErrorBody = async (response: Response) => {
-  const text = await response.text();
-  if (!text) return response.statusText || "Samva request failed";
-  try {
-    const parsed = JSON.parse(text) as { message?: unknown; error?: unknown };
-    if (typeof parsed.message === "string") return parsed.message;
-    if (typeof parsed.error === "string") return parsed.error;
-    return text;
-  } catch {
-    return text;
-  }
-};
-
-const normalizeFailure = (error: unknown): SamvaMailboxToolResult<never> => ({
-  ok: false,
-  status: 0,
-  error: error instanceof Error ? error.message : String(error),
-});
-
-export const createMailboxClient = (config: SamvaMailboxClientConfig) => {
-  const requestFetch = config.fetch ?? globalThis.fetch;
-  const baseUrl = config.baseUrl ?? DEFAULT_BASE_URL;
-  const mailboxPath = `/v1/mailboxes/${encodeURIComponent(config.mailboxId)}`;
-
-  const request = async <T>(
-    path: string,
-    init?: RequestInit,
-  ): Promise<SamvaMailboxToolResult<T>> => {
-    try {
-      const response = await requestFetch(joinUrl(baseUrl, path), {
-        ...init,
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${config.apiKey}`,
-          ...(init?.body === undefined ? {} : { "Content-Type": "application/json" }),
-          ...init?.headers,
-        },
-      });
-      if (!response.ok) {
-        return { ok: false, status: response.status, error: await readErrorBody(response) };
-      }
-      if (response.status === 204) return { ok: true, data: undefined as T };
-      return { ok: true, data: (await response.json()) as T };
-    } catch (error) {
-      return normalizeFailure(error);
-    }
-  };
-
-  const post = <T>(path: string, body: unknown) =>
-    request<T>(path, { method: "POST", body: JSON.stringify(body) });
-
-  const patch = <T>(path: string, body: unknown) =>
-    request<T>(path, { method: "PATCH", body: JSON.stringify(body) });
-
+const createMailboxContext = (config: SamvaMailboxClientConfig): SamvaMailboxClient => {
+  const { mailboxId, ...clientConfig } = config;
   return {
-    listMailboxes: () => request<{ items: unknown[] }>("/v1/mailboxes"),
-    getMailbox: () => request<Record<string, unknown>>(mailboxPath),
-    listThreads: (query: SamvaMailboxThreadListQuery = {}) =>
-      request<{ items: unknown[]; pagination?: unknown }>(
-        `${mailboxPath}/threads${encodeQuery(query)}`,
-      ),
-    getThread: (threadId: string) =>
-      request<Record<string, unknown>>(`${mailboxPath}/threads/${encodeURIComponent(threadId)}`),
-    listThreadItems: (threadId: string) =>
-      request<{ items: unknown[]; pagination?: unknown }>(
-        `${mailboxPath}/threads/${encodeURIComponent(threadId)}/items`,
-      ),
-    listThreadMessages: (threadId: string) =>
-      request<{ items: unknown[]; pagination?: unknown }>(
-        `${mailboxPath}/threads/${encodeURIComponent(threadId)}/messages`,
-      ),
-    listThreadDrafts: (threadId: string) =>
-      request<{ items: unknown[] }>(
-        `${mailboxPath}/threads/${encodeURIComponent(threadId)}/drafts`,
-      ),
-    createDraft: (threadId: string, content: Record<string, unknown>) =>
-      post<Record<string, unknown>>(
-        `${mailboxPath}/threads/${encodeURIComponent(threadId)}/drafts`,
-        {
-          content,
-        },
-      ),
-    updateDraft: (threadId: string, draftId: string, content: Record<string, unknown>) =>
-      patch<Record<string, unknown>>(
-        `${mailboxPath}/threads/${encodeURIComponent(threadId)}/drafts/${encodeURIComponent(
-          draftId,
-        )}`,
-        { content },
-      ),
-    listActions: () => request<{ items: unknown[] }>(`${mailboxPath}/actions`),
-    proposeAction: (input: {
-      type: SamvaMailboxActionType;
-      threadId?: string | undefined;
-      payload: Record<string, unknown>;
-    }) =>
-      post<SamvaMailboxActionProposalResponse>(`${mailboxPath}/actions`, {
-        type: input.type,
-        source: "aiSdkTool",
-        threadId: input.threadId,
-        payload: input.payload,
-      }),
+    mailboxId,
+    mailboxes: createClient({
+      ...clientConfig,
+      responseStyle: "data",
+      throwOnError: true,
+    }).mailboxes,
   };
 };
-
-export type SamvaMailboxClient = ReturnType<typeof createMailboxClient>;
 
 const threadListInput = z.object({
   folder: z.string().optional().describe("Mailbox folder to list, such as inbox or pending."),
@@ -221,16 +97,12 @@ const sendEmailInput = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
-const requireSendCapability = (config: SamvaMailboxToolsConfig) => {
+const assertSendCapability = (config: SamvaMailboxToolsConfig) => {
   if (config.capabilities?.send !== true) {
-    return {
-      ok: false as const,
-      status: 403,
-      error:
-        "Send tools are disabled by default. Pass capabilities: { send: true } to opt into policy-gated sends.",
-    };
+    throw new Error(
+      "Send tools are disabled by default. Pass capabilities: { send: true } to opt into policy-gated sends.",
+    );
   }
-  return undefined;
 };
 
 const approvalPayload = (
@@ -247,7 +119,12 @@ export const listMailboxThreadsTool = (client: SamvaMailboxClient) =>
     description:
       "List Samva mailbox threads. Use this to find recent inbound, pending, or labeled conversations before reading a specific thread.",
     inputSchema: threadListInput,
-    execute: async (input) => client.listThreads(input),
+    execute: async ({ limit, ...query }) =>
+      client.mailboxes.listThreads({
+        mailboxId: client.mailboxId,
+        ...query,
+        ...(limit === undefined ? {} : { limit: String(limit) }),
+      }),
   });
 
 export const getMailboxThreadTool = (client: SamvaMailboxClient) =>
@@ -255,7 +132,8 @@ export const getMailboxThreadTool = (client: SamvaMailboxClient) =>
     description:
       "Get a Samva mailbox thread with participants, actor state, and visible timeline item references.",
     inputSchema: threadIdInput,
-    execute: async ({ threadId }) => client.getThread(threadId),
+    execute: async ({ threadId }) =>
+      client.mailboxes.getThread({ mailboxId: client.mailboxId, threadId }),
   });
 
 export const listMailboxThreadItemsTool = (client: SamvaMailboxClient) =>
@@ -263,21 +141,24 @@ export const listMailboxThreadItemsTool = (client: SamvaMailboxClient) =>
     description:
       "List unified timeline items for a Samva mailbox thread, including message, event, action, note, and draft references.",
     inputSchema: threadIdInput,
-    execute: async ({ threadId }) => client.listThreadItems(threadId),
+    execute: async ({ threadId }) =>
+      client.mailboxes.listThreadItems({ mailboxId: client.mailboxId, threadId }),
   });
 
 export const listMailboxThreadMessagesTool = (client: SamvaMailboxClient) =>
   tool({
     description: "List message references for a Samva mailbox thread.",
     inputSchema: threadIdInput,
-    execute: async ({ threadId }) => client.listThreadMessages(threadId),
+    execute: async ({ threadId }) =>
+      client.mailboxes.listThreadMessages({ mailboxId: client.mailboxId, threadId }),
   });
 
 export const listMailboxThreadDraftsTool = (client: SamvaMailboxClient) =>
   tool({
     description: "List saved drafts for a Samva mailbox thread.",
     inputSchema: threadIdInput,
-    execute: async ({ threadId }) => client.listThreadDrafts(threadId),
+    execute: async ({ threadId }) =>
+      client.mailboxes.listThreadDrafts({ mailboxId: client.mailboxId, threadId }),
   });
 
 export const createMailboxDraftTool = (client: SamvaMailboxClient) =>
@@ -285,7 +166,8 @@ export const createMailboxDraftTool = (client: SamvaMailboxClient) =>
     description:
       "Create a Samva mailbox draft. This does not send email and is safe for automatic agent use.",
     inputSchema: createDraftInput,
-    execute: async ({ threadId, ...content }) => client.createDraft(threadId, content),
+    execute: async ({ threadId, ...content }) =>
+      client.mailboxes.createDraft({ mailboxId: client.mailboxId, threadId, content }),
   });
 
 export const updateMailboxDraftTool = (client: SamvaMailboxClient) =>
@@ -294,21 +176,22 @@ export const updateMailboxDraftTool = (client: SamvaMailboxClient) =>
       "Update a Samva mailbox draft. This does not send email and is safe for automatic agent use.",
     inputSchema: updateDraftInput,
     execute: async ({ threadId, draftId, ...content }) =>
-      client.updateDraft(threadId, draftId, content),
+      client.mailboxes.updateDraft({ mailboxId: client.mailboxId, threadId, draftId, content }),
   });
 
 export const sendMailboxReplyTool = (config: SamvaMailboxToolsConfig) => {
-  const client = createMailboxClient(config);
+  const client = createMailboxContext(config);
   return tool({
     description:
       "Propose a Samva mailbox reply. This routes through Samva policy gates and may return approvalRequired instead of sending immediately.",
     inputSchema: replyInput,
     execute: async ({ threadId, ...payload }) => {
-      const disabled = requireSendCapability(config);
-      if (disabled) return disabled;
-      return client.proposeAction({
-        type: "reply",
+      assertSendCapability(config);
+      return client.mailboxes.proposeThreadAction({
+        mailboxId: client.mailboxId,
         threadId,
+        type: "reply",
+        source: "aiSdkTool",
         payload: approvalPayload(config.approvalMode, payload),
       });
     },
@@ -316,18 +199,25 @@ export const sendMailboxReplyTool = (config: SamvaMailboxToolsConfig) => {
 };
 
 export const sendMailboxEmailTool = (config: SamvaMailboxToolsConfig) => {
-  const client = createMailboxClient(config);
+  const client = createMailboxContext(config);
   return tool({
     description:
       "Propose a new Samva mailbox email send. This is opt-in and routes through Samva policy gates.",
     inputSchema: sendEmailInput,
     execute: async ({ threadId, ...payload }) => {
-      const disabled = requireSendCapability(config);
-      if (disabled) return disabled;
-      return client.proposeAction({
-        type: "sendMessage",
-        ...(threadId === undefined ? {} : { threadId }),
+      assertSendCapability(config);
+      const body = {
+        type: "sendMessage" as const,
+        source: "aiSdkTool" as const,
         payload: approvalPayload(config.approvalMode, payload),
+      };
+      if (threadId === undefined) {
+        return client.mailboxes.proposeAction({ mailboxId: client.mailboxId, ...body });
+      }
+      return client.mailboxes.proposeThreadAction({
+        mailboxId: client.mailboxId,
+        threadId,
+        ...body,
       });
     },
   });
@@ -338,7 +228,7 @@ export const samvaMailboxToolApproval = (input: { mode: SamvaMailboxApprovalMode
 });
 
 export const mailboxTools = (config: SamvaMailboxToolsConfig) => {
-  const client = createMailboxClient(config);
+  const client = createMailboxContext(config);
   const capabilities = {
     read: true,
     draft: true,

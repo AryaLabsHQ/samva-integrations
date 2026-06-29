@@ -25,15 +25,17 @@
     "build": "tsdown",
     "dev": "tsdown --watch --ignore-watch .turbo",
     "typecheck": "tsgo --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --root ../.. packages/ai-sdk/tests"
   },
   "dependencies": {
     "zod": "^4.2.0"
   },
   "devDependencies": {
-    "ai": "^5.0.113"
+    "ai": "^5.0.113",
+    "samva": "link:samva"
   },
   "peerDependencies": {
-    "ai": "^5.0.0"
+    "ai": "^5.0.0",
+    "samva": "^0.1.0"
   }
 }

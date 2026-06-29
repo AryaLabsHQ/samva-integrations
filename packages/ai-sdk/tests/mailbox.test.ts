@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  createMailboxClient,
-  mailboxTools,
-  samvaMailboxToolApproval,
-  sendMailboxReplyTool,
-} from "../src/mailbox";
+import { mailboxTools, samvaMailboxToolApproval, sendMailboxReplyTool } from "../src/mailbox";
 
 const jsonResponse = (body: unknown, init?: ResponseInit) =>
   new Response(JSON.stringify(body), {
@@ -15,13 +10,27 @@ const jsonResponse = (body: unknown, init?: ResponseInit) =>
   });
 
 const createFetch = (response: Response = jsonResponse({ ok: true })) => {
-  const calls: Array<{ url: string; init?: RequestInit | undefined }> = [];
+  const calls: Array<{
+    url: string;
+    method: string;
+    headers: Headers;
+    body: string | undefined;
+  }> = [];
   const mockedFetch: typeof fetch = (async (url, init) => {
-    calls.push({ url: String(url), init });
+    const request = url instanceof Request ? url : new Request(url, init);
+    const body = await request.clone().text();
+    calls.push({
+      url: request.url,
+      method: request.method,
+      headers: request.headers,
+      body: body === "" ? undefined : body,
+    });
     return response.clone();
   }) as typeof fetch;
   return { calls, fetch: mockedFetch };
 };
+
+const headersObject = (headers: HeadersInit) => Object.fromEntries(new Headers(headers).entries());
 
 const executeTool = async <TInput>(toolValue: unknown, input: TInput) => {
   const executable = toolValue as {
@@ -52,22 +61,21 @@ describe("@samva/ai-sdk mailbox tools", () => {
     const { calls, fetch } = createFetch(
       jsonResponse({ items: [], pagination: { hasMore: false } }),
     );
-    const client = createMailboxClient({
+    const tools = mailboxTools({
       apiKey: "sk_test",
       mailboxId: "mailbox_123",
       baseUrl: "https://api.test",
       fetch,
     });
 
-    const result = await client.listThreads({ folder: "inbox", limit: 10 });
+    const result = await executeTool(tools.listMailboxThreads, { folder: "inbox", limit: 10 });
 
-    expect(result).toEqual({ ok: true, data: { items: [], pagination: { hasMore: false } } });
+    expect(result).toEqual({ items: [], pagination: { hasMore: false } });
     expect(calls[0]?.url).toBe(
       "https://api.test/v1/mailboxes/mailbox_123/threads?folder=inbox&limit=10",
     );
-    expect(calls[0]?.init?.headers).toMatchObject({
-      Accept: "application/json",
-      Authorization: "Bearer sk_test",
+    expect(headersObject(calls[0]!.headers)).toMatchObject({
+      "x-api-key": "sk_test",
     });
   });
 
@@ -85,13 +93,13 @@ describe("@samva/ai-sdk mailbox tools", () => {
       text: "Thanks, we are checking this.",
     });
 
-    expect(result).toEqual({ ok: true, data: { id: "draft_123" } });
+    expect(result).toEqual({ id: "draft_123" });
     expect(calls).toHaveLength(1);
     expect(calls[0]?.url).toBe(
       "https://api.test/v1/mailboxes/mailbox_123/threads/thread_123/drafts",
     );
-    expect(calls[0]?.init?.method).toBe("POST");
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+    expect(calls[0]?.method).toBe("POST");
+    expect(JSON.parse(String(calls[0]?.body))).toEqual({
       content: { text: "Thanks, we are checking this." },
     });
   });
@@ -124,19 +132,19 @@ describe("@samva/ai-sdk mailbox tools", () => {
         threadId: "thread_123",
         text: "Ship it",
       }),
-    ).resolves.toMatchObject({
-      ok: false,
-      status: 403,
-    });
+    ).rejects.toThrow("Send tools are disabled by default");
   });
 
   it("proposes send actions through Samva policy gates", async () => {
     const { calls, fetch } = createFetch(
-      jsonResponse({
-        status: "approvalRequired",
-        reason: "Human approval required",
-        action: { id: "action_123", state: "approvalRequired" },
-      }),
+      jsonResponse(
+        {
+          status: "approvalRequired",
+          reason: "Human approval required",
+          action: { id: "action_123", state: "approvalRequired" },
+        },
+        { status: 202 },
+      ),
     );
     const tools = mailboxTools({
       apiKey: "sk_test",
@@ -154,18 +162,16 @@ describe("@samva/ai-sdk mailbox tools", () => {
     });
 
     expect(result).toEqual({
-      ok: true,
-      data: {
-        status: "approvalRequired",
-        reason: "Human approval required",
-        action: { id: "action_123", state: "approvalRequired" },
-      },
+      status: "approvalRequired",
+      reason: "Human approval required",
+      action: { id: "action_123", state: "approvalRequired" },
     });
-    expect(calls[0]?.url).toBe("https://api.test/v1/mailboxes/mailbox_123/actions");
-    expect(JSON.parse(String(calls[0]?.init?.body))).toEqual({
+    expect(calls[0]?.url).toBe(
+      "https://api.test/v1/mailboxes/mailbox_123/threads/thread_123/actions",
+    );
+    expect(JSON.parse(String(calls[0]?.body))).toEqual({
       type: "reply",
       source: "aiSdkTool",
-      threadId: "thread_123",
       payload: {
         draftId: "draft_123",
         text: "Approved?",
