@@ -52,7 +52,10 @@ app.post("/send", async (c) => {
   });
 
   if (error) {
-    return c.json({ ok: false, error }, 502);
+    return c.json(
+      { ok: false, error: error instanceof Error ? error.message : String(error) },
+      502,
+    );
   }
 
   return c.json({ ok: true, id: data?.id });
