@@ -28,7 +28,8 @@ function Home() {
         className="contact-form"
         onSubmit={async (event) => {
           event.preventDefault();
-          const form = new FormData(event.currentTarget);
+          const formElement = event.currentTarget;
+          const form = new FormData(formElement);
 
           setStatus("sending");
           setError(null);
@@ -42,7 +43,7 @@ function Home() {
               },
             });
             setStatus("sent");
-            event.currentTarget.reset();
+            formElement.reset();
           } catch (err) {
             setStatus("idle");
             setError(err instanceof Error ? err.message : "Unable to send email");
