@@ -48,12 +48,7 @@ function parseSendRequest(body: unknown): Effect.Effect<SendRequest, RequestErro
   if (!subject) fields.subject = "Provide an email subject.";
   if (!message) fields.message = "Provide a plain-text message.";
 
-  if (
-    Object.keys(fields).length > 0 ||
-    to === undefined ||
-    subject === undefined ||
-    message === undefined
-  ) {
+  if (Object.keys(fields).length > 0) {
     return Effect.fail(
       new RequestError({
         message: "Request body is missing required fields.",
@@ -63,7 +58,7 @@ function parseSendRequest(body: unknown): Effect.Effect<SendRequest, RequestErro
     );
   }
 
-  return Effect.succeed({ to, subject, message });
+  return Effect.succeed({ to: to!, subject: subject!, message: message! });
 }
 
 function parseJson(request: Request): Effect.Effect<unknown, RequestError> {
@@ -94,7 +89,12 @@ export function createFetchHandler(config: SamvaClientConfig): {
   return {
     fetch: (request) => {
       if (request.method !== "POST") {
-        return Promise.resolve(jsonResponse({ error: "method_not_allowed" }, { status: 405 }));
+        return Promise.resolve(
+          jsonResponse(
+            { error: "method_not_allowed" },
+            { status: 405, headers: { Allow: "POST" } },
+          ),
+        );
       }
 
       const program = Effect.gen(function* () {
@@ -102,18 +102,21 @@ export function createFetchHandler(config: SamvaClientConfig): {
         const input = yield* parseSendRequest(body);
         const samva = yield* SamvaClient;
 
-        return yield* samva.email.send({
-          to: input.to,
-          subject: input.subject,
-          html: renderMessageHtml(input.message),
-          text: input.message,
-        });
+        return yield* samva.email
+          .send({
+            to: input.to,
+            subject: input.subject,
+            html: renderMessageHtml(input.message),
+            text: input.message,
+          })
+          .pipe(
+            Effect.retry({
+              schedule: Schedule.exponential("200 millis").pipe(Schedule.jittered),
+              times: 3,
+              while: isRetryable,
+            }),
+          );
       }).pipe(
-        Effect.retry({
-          schedule: Schedule.exponential("200 millis").pipe(Schedule.jittered),
-          times: 3,
-          while: isRetryable,
-        }),
         Effect.map((message) =>
           jsonResponse({
             id: message.id,
