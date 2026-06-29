@@ -37,7 +37,8 @@ SAMVA_API_KEY=sk_sm_...
 Escape user-controlled strings before putting them in HTML:
 
 ```ts
-const escapeHtml = (value: string): string =>
+// lib/email-html.ts
+export const escapeHtml = (value: string): string =>
   value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -56,6 +57,7 @@ submit a `<form>` directly to server code.
 "use server";
 
 import { samva } from "../../lib/samva";
+import { escapeHtml } from "../../lib/email-html";
 
 export interface ContactFormState {
   status: "idle" | "success" | "error";
@@ -75,15 +77,19 @@ export async function sendContactEmail(
 
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
 
-  await samva.messages.send({
-    to: [{ email }],
-    channel: "email",
-    email: {
-      subject: "Thanks for contacting us",
-      html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
-      text: `Thanks for reaching out.\n\n${message}`,
-    },
-  });
+  try {
+    await samva.messages.send({
+      to: [{ email }],
+      channel: "email",
+      email: {
+        subject: "Thanks for contacting us",
+        html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
+        text: `Thanks for reaching out.\n\n${message}`,
+      },
+    });
+  } catch {
+    return { status: "error", message: "Failed to send message. Please try again." };
+  }
 
   return { status: "success", message: "Message sent." };
 }
@@ -129,11 +135,19 @@ Use a Route Handler when another service or client needs a JSON endpoint.
 ```ts
 // app/api/send/route.ts
 import { samva } from "../../../lib/samva";
+import { escapeHtml } from "../../../lib/email-html";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { email?: unknown; message?: unknown };
+  const body = (await request.json().catch(() => null)) as {
+    email?: unknown;
+    message?: unknown;
+  } | null;
+  if (!body) {
+    return Response.json({ ok: false, error: "Expected a JSON object." }, { status: 400 });
+  }
+
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const message = typeof body.message === "string" ? body.message.trim() : "";
 
@@ -143,15 +157,20 @@ export async function POST(request: Request) {
 
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
 
-  const result = await samva.messages.send({
-    to: [{ email }],
-    channel: "email",
-    email: {
-      subject: "Thanks for contacting us",
-      html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
-      text: `Thanks for reaching out.\n\n${message}`,
-    },
-  });
+  let result;
+  try {
+    result = await samva.messages.send({
+      to: [{ email }],
+      channel: "email",
+      email: {
+        subject: "Thanks for contacting us",
+        html: `<p>Thanks for reaching out.</p><p>${safeMessage}</p>`,
+        text: `Thanks for reaching out.\n\n${message}`,
+      },
+    });
+  } catch {
+    return Response.json({ ok: false, error: "Failed to send message." }, { status: 502 });
+  }
 
   return Response.json({ ok: true, result });
 }
@@ -190,6 +209,7 @@ and call it from `pages/api`.
 // pages/api/send.ts
 import type { NextApiRequest, NextApiResponse } from "next";
 
+import { escapeHtml } from "../../lib/email-html";
 import { samva } from "../../lib/samva";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

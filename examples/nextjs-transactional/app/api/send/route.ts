@@ -35,11 +35,16 @@ export async function POST(request: Request) {
     ...(senderName ? { name: senderName } : {}),
   };
 
-  const result = await samva.messages.send({
-    to: [{ email: recipientEmail }],
-    channel: "email",
-    email: buildContactEmail(contact),
-  });
+  let result;
+  try {
+    result = await samva.messages.send({
+      to: [{ email: recipientEmail }],
+      channel: "email",
+      email: buildContactEmail(contact),
+    });
+  } catch {
+    return Response.json({ ok: false, error: "Failed to send message." }, { status: 502 });
+  }
 
   return Response.json({ ok: true, result });
 }

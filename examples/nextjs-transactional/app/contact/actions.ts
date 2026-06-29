@@ -29,11 +29,15 @@ export async function sendContactEmail(
     ...(name ? { name } : {}),
   };
 
-  await samva.messages.send({
-    to: [{ email }],
-    channel: "email",
-    email: buildContactEmail(contact),
-  });
+  try {
+    await samva.messages.send({
+      to: [{ email }],
+      channel: "email",
+      email: buildContactEmail(contact),
+    });
+  } catch {
+    return { status: "error", message: "Failed to send message. Please try again." };
+  }
 
   return { status: "success", message: "Message accepted by Samva." };
 }
