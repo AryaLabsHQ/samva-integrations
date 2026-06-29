@@ -15,8 +15,8 @@ bun install
 cp examples/sveltekit-transactional/.env.example examples/sveltekit-transactional/.env
 ```
 
-Add a real `SAMVA_API_KEY` in `.env`. The key is read only from server code via
-`$env/dynamic/private`.
+Add a real `SAMVA_API_KEY` and a random `SAMVA_SEND_TOKEN` in `.env`. Both are
+read only from server code via `$env/dynamic/private`.
 
 Your Samva account must have a verified sender or domain before production sends
 will deliver. There is no `from` field in this example; Samva uses the verified
@@ -35,6 +35,7 @@ a SvelteKit `fail(400, ...)` result and re-renders the page with the error.
 
 ```sh
 curl -X POST http://localhost:5173/api/send \
+  -H "Authorization: Bearer replace-with-a-random-route-token" \
   -H "Content-Type: application/json" \
   -d '{
     "to": "ada@example.com",
@@ -44,7 +45,8 @@ curl -X POST http://localhost:5173/api/send \
 ```
 
 The route returns `{ "ok": true }` only after Samva accepts the send. Invalid
-payloads return `400`. The example never stubs a successful send.
+payloads return `400`, and missing or invalid bearer tokens return `401`. The
+example never stubs a successful send.
 
 ## Build
 

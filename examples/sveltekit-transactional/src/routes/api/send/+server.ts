@@ -1,3 +1,4 @@
+import { env } from "$env/dynamic/private";
 import { buildContactEmail } from "$lib/contact-email";
 import { getSamva } from "$lib/server/samva";
 import { error, json } from "@sveltejs/kit";
@@ -19,6 +20,15 @@ const readString = (value: unknown): string => (typeof value === "string" ? valu
 const isEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 export const POST: RequestHandler = async ({ request }) => {
+  const sendToken = env.SAMVA_SEND_TOKEN;
+  if (!sendToken) {
+    error(500, "SAMVA_SEND_TOKEN is not configured.");
+  }
+
+  if (request.headers.get("authorization") !== `Bearer ${sendToken}`) {
+    error(401, "Unauthorized.");
+  }
+
   const body: unknown = await request.json().catch(() => null);
   if (!isRecord(body)) {
     error(400, "Expected a JSON object.");

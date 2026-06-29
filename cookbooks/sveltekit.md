@@ -20,6 +20,7 @@ Set a server-only key:
 
 ```sh
 SAMVA_API_KEY=sk_sm_your_key_here
+SAMVA_SEND_TOKEN=replace-with-a-random-route-token
 ```
 
 Create a Samva client helper in `src/lib/server`. Modules under `src/lib/server` and
@@ -30,14 +31,17 @@ code is a build error.
 // src/lib/server/samva.ts
 import { env } from "$env/dynamic/private";
 import { createClient } from "samva";
+import type { SamvaClient } from "samva";
 
-export function getSamva() {
+let samva: SamvaClient | undefined;
+
+export function getSamva(): SamvaClient {
   const apiKey = env.SAMVA_API_KEY;
   if (!apiKey) {
     throw new Error("SAMVA_API_KEY is not set.");
   }
 
-  return createClient({ apiKey });
+  return (samva ??= createClient({ apiKey }));
 }
 ```
 
@@ -137,6 +141,7 @@ app. Keep auth and rate limits in the endpoint or surrounding hooks.
 
 ```ts
 // src/routes/api/send/+server.ts
+import { env } from "$env/dynamic/private";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
@@ -156,6 +161,15 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const readString = (value: unknown): string => (typeof value === "string" ? value.trim() : "");
 
 export const POST: RequestHandler = async ({ request }) => {
+  const sendToken = env.SAMVA_SEND_TOKEN;
+  if (!sendToken) {
+    error(500, "SAMVA_SEND_TOKEN is not configured.");
+  }
+
+  if (request.headers.get("authorization") !== `Bearer ${sendToken}`) {
+    error(401, "Unauthorized.");
+  }
+
   const body: unknown = await request.json().catch(() => null);
   if (!isRecord(body)) {
     error(400, "Expected a JSON object.");
