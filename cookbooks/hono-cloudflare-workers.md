@@ -160,7 +160,12 @@ app.post("/send-background", async (c) => {
     return c.json({ error: "to and subject are required" }, 400);
   }
 
-  const samva = createClient({ apiKey: c.env.SAMVA_API_KEY });
+  const apiKey = c.env.SAMVA_API_KEY;
+  if (!apiKey) {
+    throw new Error("SAMVA_API_KEY is not configured for this Worker.");
+  }
+
+  const samva = createClient({ apiKey });
   c.executionCtx.waitUntil(
     samva.messages.send({
       to: [{ email: recipientEmail }],
