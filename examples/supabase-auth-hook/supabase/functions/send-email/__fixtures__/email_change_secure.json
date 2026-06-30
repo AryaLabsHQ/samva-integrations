@@ -1,0 +1,16 @@
+{
+  "user": {
+    "id": "user_change_secure",
+    "email": "current@example.com",
+    "new_email": "updated@example.com"
+  },
+  "email_data": {
+    "token": "123456",
+    "token_hash": "new-email-token-hash",
+    "redirect_to": "https://app.example.com/account",
+    "email_action_type": "email_change",
+    "site_url": "https://app.example.com",
+    "token_new": "654321",
+    "token_hash_new": "current-email-token-hash"
+  }
+}

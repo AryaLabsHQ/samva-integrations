@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": "user_recovery",
+    "email": "recover@example.com"
+  },
+  "email_data": {
+    "token": "444444",
+    "token_hash": "recovery-token-hash",
+    "redirect_to": "https://app.example.com/reset",
+    "email_action_type": "recovery",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

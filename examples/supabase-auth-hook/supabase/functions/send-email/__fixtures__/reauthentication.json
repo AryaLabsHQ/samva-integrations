@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": "user_reauth",
+    "email": "reauth@example.com"
+  },
+  "email_data": {
+    "token": "666666",
+    "token_hash": "",
+    "redirect_to": "https://app.example.com/security",
+    "email_action_type": "reauthentication",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

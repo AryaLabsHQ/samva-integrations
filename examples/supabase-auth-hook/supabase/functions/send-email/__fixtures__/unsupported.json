@@ -1,0 +1,15 @@
+{
+  "user": {
+    "id": "user_unsupported",
+    "email": "unsupported@example.com"
+  },
+  "email_data": {
+    "token": "777777",
+    "token_hash": "unsupported-token-hash",
+    "redirect_to": "https://app.example.com",
+    "email_action_type": "password_changed_notification",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

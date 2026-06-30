@@ -1,0 +1,17 @@
+{
+  "user": {
+    "id": "user_signup",
+    "email": "ada@example.com",
+    "aud": "authenticated",
+    "role": "authenticated"
+  },
+  "email_data": {
+    "token": "111111",
+    "token_hash": "signup-token-hash",
+    "redirect_to": "https://app.example.com/welcome",
+    "email_action_type": "signup",
+    "site_url": "https://app.example.com",
+    "token_new": "",
+    "token_hash_new": ""
+  }
+}

@@ -5,7 +5,7 @@ export default defineConfig({
     environment: "node",
     globals: false,
     passWithNoTests: true,
-    include: ["packages/**/tests/**/*.{test,spec}.ts"],
+    include: ["packages/**/tests/**/*.{test,spec}.ts", "examples/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["**/node_modules/**", "**/dist/**", "**/.turbo/**", "**/coverage/**"],
     coverage: {
       enabled: false,

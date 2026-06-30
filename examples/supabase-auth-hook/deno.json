@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  },
+  "imports": {
+    "react": "npm:react@19.2.7",
+    "react/jsx-runtime": "npm:react@19.2.7/jsx-runtime",
+    "react-email": "npm:react-email@6.6.5",
+    "samva": "npm:samva@0.0.1",
+    "standardwebhooks": "npm:standardwebhooks@1.0.0"
+  },
+  "tasks": {
+    "serve": "supabase functions serve send-email --no-verify-jwt",
+    "typecheck": "deno check --node-modules-dir=auto --no-lock supabase/functions/send-email/index.ts"
+  }
+}
