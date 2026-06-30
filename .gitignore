@@ -3,6 +3,8 @@ dist
 coverage
 .turbo
 .wrangler
+**/.svelte-kit
+examples/*/build
 .scratchpad
 *.tsbuildinfo
 .env
