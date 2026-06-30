@@ -22,9 +22,16 @@ conversation-aware email workflows.
 ## Cookbooks
 
 - [`AI SDK Mailbox Tools`](./cookbooks/ai-sdk-mailbox.md)
+- [`Next.js`](./cookbooks/nextjs.md)
+- [`React Email`](./cookbooks/react-email.md)
 
 Integrations land as individual pull requests. See
 [CONTRIBUTING.md](./CONTRIBUTING.md) to propose or build one.
+
+## Examples
+
+- [`nextjs-transactional`](./examples/nextjs-transactional) — App Router
+  contact form plus `/api/send` route handler using the Samva SDK.
 
 ## Getting started
 

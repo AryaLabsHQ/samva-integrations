@@ -1,0 +1,24 @@
+{
+  "name": "nextjs-transactional-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Next.js App Router transactional email example using the Samva SDK.",
+  "type": "module",
+  "scripts": {
+    "build": "SAMVA_API_KEY=sk_sm_build_placeholder next build --webpack",
+    "dev": "next dev",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "next": "^16.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "samva": "link:samva",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0"
+  }
+}
