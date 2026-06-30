@@ -20,7 +20,7 @@
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "clean": "rm -rf node_modules .turbo coverage packages/*/dist examples/*/.next examples/*/.output"
+    "clean": "rm -rf node_modules .turbo coverage packages/*/dist examples/*/.next examples/*/.output examples/*/.wrangler"
   },
   "devDependencies": {
     "@tsconfig/bun": "^1.0.10",

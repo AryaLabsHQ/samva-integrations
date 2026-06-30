@@ -16,6 +16,7 @@ export default defineConfig({
     "**/.output",
     "**/.turbo",
     "**/routeTree.gen.ts",
+    "**/.wrangler",
     ".claude",
     "node_modules",
   ],

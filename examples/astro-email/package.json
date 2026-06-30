@@ -1,0 +1,24 @@
+{
+  "name": "astro-email-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Astro Actions and API endpoint example for sending email with Samva on Cloudflare Workers.",
+  "type": "module",
+  "scripts": {
+    "build": "SAMVA_API_KEY=sk_sm_build_placeholder astro build",
+    "dev": "astro dev",
+    "preview": "astro preview",
+    "typecheck": "astro check",
+    "wrangler:dev": "wrangler dev"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.0.1",
+    "astro": "^7.0.3",
+    "samva": "link:samva"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.105.0"
+  }
+}
