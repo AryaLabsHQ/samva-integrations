@@ -22,6 +22,7 @@ conversation-aware email workflows.
 ## Cookbooks
 
 - [`AI SDK Mailbox Tools`](./cookbooks/ai-sdk-mailbox.md)
+- [`Hono on Cloudflare Workers`](./cookbooks/hono-cloudflare-workers.md)
 - [`Next.js`](./cookbooks/nextjs.md)
 - [`React Email`](./cookbooks/react-email.md)
 
