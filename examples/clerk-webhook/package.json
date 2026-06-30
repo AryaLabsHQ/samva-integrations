@@ -1,0 +1,27 @@
+{
+  "name": "clerk-webhook-samva",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Next.js App Router Clerk webhook example that sends email through Samva.",
+  "type": "module",
+  "scripts": {
+    "build": "SAMVA_API_KEY=sk_sm_build_placeholder CLERK_WEBHOOK_SIGNING_SECRET=whsec_build_placeholder NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YnVpbGRfcGxhY2Vob2xkZXI= CLERK_SECRET_KEY=sk_test_YnVpbGRfcGxhY2Vob2xkZXI= next build --webpack",
+    "dev": "next dev",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^7.5.10",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.0.9",
+    "next": "^16.2.9",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "samva": "link:samva",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0"
+  }
+}
