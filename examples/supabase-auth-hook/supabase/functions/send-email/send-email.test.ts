@@ -14,7 +14,7 @@ const base64Secret = Buffer.from(rawSecret).toString("base64");
 const env: HookEnv = {
   SEND_EMAIL_HOOK_SECRET: `v1,whsec_${base64Secret}`,
   SUPABASE_PROJECT_REF: "project-ref",
-  SAMVA_API_KEY: "sk_sm_test",
+  SAMVA_API_KEY: "samva_sk_test_fixture",
 };
 
 function fixture(name: string): SendEmailHookPayload {

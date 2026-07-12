@@ -5,7 +5,7 @@
   "description": "Next.js App Router Clerk webhook example that sends email through Samva.",
   "type": "module",
   "scripts": {
-    "build": "SAMVA_API_KEY=sk_sm_build_placeholder CLERK_WEBHOOK_SIGNING_SECRET=whsec_build_placeholder NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YnVpbGRfcGxhY2Vob2xkZXI= CLERK_SECRET_KEY=sk_test_YnVpbGRfcGxhY2Vob2xkZXI= next build --webpack",
+    "build": "SAMVA_API_KEY=samva_sk_test_build_placeholder CLERK_WEBHOOK_SIGNING_SECRET=whsec_build_placeholder NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_YnVpbGRfcGxhY2Vob2xkZXI= CLERK_SECRET_KEY=sk_test_YnVpbGRfcGxhY2Vob2xkZXI= next build --webpack",
     "dev": "next dev",
     "typecheck": "tsgo --noEmit"
   },
