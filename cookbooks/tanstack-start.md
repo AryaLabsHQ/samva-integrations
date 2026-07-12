@@ -21,7 +21,7 @@ Set a server-only key. Do not prefix it with `VITE_`; client-side env vars are
 public in TanStack Start.
 
 ```sh
-SAMVA_API_KEY=sk_sm_your_key_here
+SAMVA_API_KEY=samva_sk_live_your_key_here
 ```
 
 Create a tiny server-only helper:

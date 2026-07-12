@@ -21,7 +21,7 @@ wrangler secret put SAMVA_API_KEY
 For local development, keep a `.dev.vars` file next to `wrangler.jsonc`:
 
 ```sh
-SAMVA_API_KEY="sk_sm_..."
+SAMVA_API_KEY="samva_sk_live_..."
 ```
 
 Configure the Worker with a module entrypoint. You do not need

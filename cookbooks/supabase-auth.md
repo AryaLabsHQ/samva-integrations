@@ -55,7 +55,7 @@ Set server-only secrets in `supabase/functions/.env` locally or in your hosted
 Supabase Function environment:
 
 ```sh
-SAMVA_API_KEY=sk_sm_...
+SAMVA_API_KEY=samva_sk_live_...
 SEND_EMAIL_HOOK_SECRET=v1,whsec_<base64-secret>
 SUPABASE_PROJECT_REF=your-project-ref
 ```

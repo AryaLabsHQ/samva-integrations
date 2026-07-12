@@ -31,7 +31,7 @@ export const samva = createClient({ apiKey });
 Add the key to `.env.local`:
 
 ```sh
-SAMVA_API_KEY=sk_sm_...
+SAMVA_API_KEY=samva_sk_live_...
 ```
 
 Escape user-controlled strings before putting them in HTML:
