@@ -19,7 +19,7 @@ bun add react-email react react-dom
 Set a server-only key:
 
 ```sh
-SAMVA_API_KEY=sk_sm_your_key_here
+SAMVA_API_KEY=samva_sk_live_your_key_here
 SAMVA_SEND_TOKEN=replace-with-a-random-route-token
 ```
 

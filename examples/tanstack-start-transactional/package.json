@@ -5,7 +5,7 @@
   "description": "TanStack Start contact form and server route that send transactional email through Samva.",
   "type": "module",
   "scripts": {
-    "build": "SAMVA_API_KEY=sk_sm_build_placeholder vite build && tsgo --noEmit",
+    "build": "SAMVA_API_KEY=samva_sk_test_build_placeholder vite build && tsgo --noEmit",
     "dev": "vite dev",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs",

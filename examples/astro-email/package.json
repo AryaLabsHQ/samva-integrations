@@ -5,7 +5,7 @@
   "description": "Astro Actions and API endpoint example for sending email with Samva on Cloudflare Workers.",
   "type": "module",
   "scripts": {
-    "build": "SAMVA_API_KEY=sk_sm_build_placeholder astro build",
+    "build": "SAMVA_API_KEY=samva_sk_test_build_placeholder astro build",
     "dev": "astro dev",
     "preview": "astro preview",
     "typecheck": "astro check",

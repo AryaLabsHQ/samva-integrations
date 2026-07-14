@@ -224,7 +224,7 @@ export default defineConfig({
 Use `.dev.vars` for local Worker secrets:
 
 ```sh
-SAMVA_API_KEY=sk_sm_...
+SAMVA_API_KEY=samva_sk_live_...
 ```
 
 If you do not need Workers, `@astrojs/node` is a straightforward alternative.

@@ -5,7 +5,7 @@
   "description": "Next.js Better Auth route handler that sends auth email through Samva.",
   "type": "module",
   "scripts": {
-    "build": "SAMVA_API_KEY=sk_sm_build_placeholder BETTER_AUTH_SECRET=build-secret-at-least-32-characters BETTER_AUTH_URL=http://localhost:3000 next build --webpack",
+    "build": "SAMVA_API_KEY=samva_sk_test_build_placeholder BETTER_AUTH_SECRET=build-secret-at-least-32-characters BETTER_AUTH_URL=http://localhost:3000 next build --webpack",
     "dev": "next dev",
     "typecheck": "tsgo --noEmit"
   },

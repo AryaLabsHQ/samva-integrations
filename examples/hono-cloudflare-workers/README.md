@@ -14,7 +14,7 @@ cp .dev.vars.example .dev.vars
 Add your Samva API key to `.dev.vars`:
 
 ```sh
-SAMVA_API_KEY="sk_sm_..."
+SAMVA_API_KEY="samva_sk_live_..."
 ```
 
 ## Run locally

@@ -5,7 +5,7 @@
   "description": "Next.js App Router transactional email example using the Samva SDK.",
   "type": "module",
   "scripts": {
-    "build": "SAMVA_API_KEY=sk_sm_build_placeholder next build --webpack",
+    "build": "SAMVA_API_KEY=samva_sk_test_build_placeholder next build --webpack",
     "dev": "next dev",
     "typecheck": "tsgo --noEmit"
   },
