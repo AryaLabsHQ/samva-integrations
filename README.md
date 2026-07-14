@@ -13,8 +13,15 @@ conversation-aware email workflows.
 - `examples/*` — complete, runnable example apps.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
 
+## Packages
+
+- `@samva/ai-sdk` — AI SDK-compatible Samva tools, including
+  `@samva/ai-sdk/mailbox` for programmable mailbox read, draft, and
+  approval-aware send tools.
+
 ## Cookbooks
 
+- [`AI SDK Mailbox Tools`](./cookbooks/ai-sdk-mailbox.md)
 - [`Hono on Cloudflare Workers`](./cookbooks/hono-cloudflare-workers.md)
 - [`Next.js`](./cookbooks/nextjs.md)
 - [`React Email`](./cookbooks/react-email.md)
