@@ -12,7 +12,7 @@ cp examples/effect-sdk/.env.example examples/effect-sdk/.env
 Set `SAMVA_API_KEY` in `.env`. The key must belong to a Samva account with a
 verified sender; the email payload does not include `from`.
 
-This example pins `effect@4.0.0-beta.85`, matching the current `samva/effect`
+This example pins `effect@4.0.0-beta.98`, matching the current `samva/effect`
 peer dependency. The HTTP transport import comes from `effect/unstable/http`
 while Effect 4 is in beta.
 
@@ -42,14 +42,21 @@ curl -sS http://localhost:3000 \
 
 `src/server.ts` builds `SamvaClient.layerFetch(config)` once, parses the JSON
 body, escapes the plain-text `message` before placing it into HTML, and maps
-typed Samva errors to HTTP responses:
+Samva's semantic tagged errors to HTTP responses:
 
-- `MessagesSend422` -> `400 validation_failed`
-- `MessagesSend401` -> `500 samva_configuration_error`
-- `MessagesSend429` -> `429 rate_limited`
+- `ValidationError` -> `400 validation_failed`, forwarding `error.fields`
+- `RateLimitedError` -> `429 rate_limited`, forwarding `error.retryAfterSeconds`
+- the auth category (`UnauthorizedError`, `ForbiddenError`), caught in one call
+  with `catchAuthError` -> `500 samva_configuration_error`
 
-Transient `MessagesSend429`, `MessagesSend500`, and `MessagesSend502` failures
-are retried with exponential jittered backoff.
+Anything left over is split by `isRetryable`: a retryable failure that outlived
+the SDK's backoff answers `502 samva_unavailable`, everything else `500`.
+
+The handler does not wrap the send in `Effect.retry`. Sends carry an
+`Idempotency-Key` and retry themselves on throttling and transient failures, so
+a failure reaching those handlers has already exhausted the built-in backoff.
+Provide `SamvaRetry.layer` to tune that policy or `SamvaRetry.layerDisabled` to
+turn it off.
 
 ## Validate the example
 
