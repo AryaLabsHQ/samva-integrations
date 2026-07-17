@@ -1,5 +1,5 @@
-import { Data, Effect, Schedule } from "effect";
-import { SamvaClient, type SamvaClientConfig } from "samva/effect";
+import { Data, Effect } from "effect";
+import { SamvaClient, type SamvaClientConfig, catchAuthError, isRetryable } from "samva/effect";
 
 import { readSamvaConfig } from "./config";
 import { renderMessageHtml } from "./html";
@@ -7,7 +7,7 @@ import { renderMessageHtml } from "./html";
 class RequestError extends Data.TaggedError("RequestError")<{
   readonly message: string;
   readonly status: number;
-  readonly fields?: Readonly<Record<string, string>>;
+  readonly fields?: Readonly<Record<string, ReadonlyArray<string>>>;
 }> {}
 
 interface SendRequest {
@@ -42,11 +42,11 @@ function parseSendRequest(body: unknown): Effect.Effect<SendRequest, RequestErro
   const to = asNonEmptyString(record, "to");
   const subject = asNonEmptyString(record, "subject");
   const message = asNonEmptyString(record, "message");
-  const fields: Record<string, string> = {};
+  const fields: Record<string, ReadonlyArray<string>> = {};
 
-  if (!to) fields.to = "Provide a recipient email address.";
-  if (!subject) fields.subject = "Provide an email subject.";
-  if (!message) fields.message = "Provide a plain-text message.";
+  if (!to) fields.to = ["Provide a recipient email address."];
+  if (!subject) fields.subject = ["Provide an email subject."];
+  if (!message) fields.message = ["Provide a plain-text message."];
 
   if (Object.keys(fields).length > 0) {
     return Effect.fail(
@@ -72,15 +72,6 @@ function parseJson(request: Request): Effect.Effect<unknown, RequestError> {
   });
 }
 
-function retryAfterSeconds(value: number | string): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-
-function isRetryable(error: { readonly _tag: string }): boolean {
-  const tag = error["_tag"];
-  return tag === "MessagesSend429" || tag === "MessagesSend500" || tag === "MessagesSend502";
-}
-
 export function createFetchHandler(config: SamvaClientConfig): {
   readonly fetch: (request: Request) => Promise<Response>;
 } {
@@ -102,25 +93,22 @@ export function createFetchHandler(config: SamvaClientConfig): {
         const input = yield* parseSendRequest(body);
         const samva = yield* SamvaClient;
 
-        return yield* samva.email
-          .send({
-            to: input.to,
-            subject: input.subject,
-            html: renderMessageHtml(input.message),
-            text: input.message,
-          })
-          .pipe(
-            Effect.retry({
-              schedule: Schedule.exponential("200 millis").pipe(Schedule.jittered),
-              times: 3,
-              while: isRetryable,
-            }),
-          );
+        // Sends carry an Idempotency-Key and retry themselves on throttling and
+        // transient failures, so a failure reaching the handlers below has
+        // already outlived the built-in backoff. Provide `SamvaRetry.layer` to
+        // tune the policy, or `SamvaRetry.layerDisabled` to opt out.
+        return yield* samva.email.send({
+          to: input.to,
+          subject: input.subject,
+          html: renderMessageHtml(input.message),
+          text: input.message,
+        });
       }).pipe(
         Effect.map((message) =>
           jsonResponse({
             id: message.id,
             status: message.status,
+            createdAt: message.createdAt.toISOString(),
           }),
         ),
         Effect.catchTags({
@@ -135,47 +123,58 @@ export function createFetchHandler(config: SamvaClientConfig): {
                 { status: error.status },
               ),
             ),
-          MessagesSend422: (error) =>
+          ValidationError: (error) =>
             Effect.succeed(
               jsonResponse(
                 {
                   error: "validation_failed",
-                  message: error.cause.message,
-                  fields: error.cause.fields ?? {},
+                  message: error.message,
+                  fields: error.fields ?? {},
                 },
                 { status: 400 },
               ),
             ),
-          MessagesSend401: () =>
-            Effect.succeed(
-              jsonResponse(
-                {
-                  error: "samva_configuration_error",
-                  message: "SAMVA_API_KEY is invalid or missing permissions.",
-                },
-                { status: 500 },
-              ),
-            ),
-          MessagesSend429: (error) =>
+          RateLimitedError: (error) =>
             Effect.succeed(
               jsonResponse(
                 {
                   error: "rate_limited",
-                  retryAfterSeconds: retryAfterSeconds(error.cause.retryAfterSeconds),
+                  retryAfterSeconds: error.retryAfterSeconds,
                 },
                 { status: 429 },
               ),
             ),
         }),
-        Effect.match({
-          onFailure: (error) =>
+        // One handler for the whole auth category — `UnauthorizedError` and
+        // `ForbiddenError` both mean the key is unusable, never the caller's fault.
+        catchAuthError(() =>
+          Effect.succeed(
             jsonResponse(
               {
-                error: "samva_send_failed",
-                message: String(error),
+                error: "samva_configuration_error",
+                message: "SAMVA_API_KEY is invalid or missing permissions.",
               },
-              { status: 502 },
+              { status: 500 },
             ),
+          ),
+        ),
+        Effect.match({
+          onFailure: (error) =>
+            isRetryable(error)
+              ? jsonResponse(
+                  {
+                    error: "samva_unavailable",
+                    message: "Samva is still failing after the SDK exhausted its retries.",
+                  },
+                  { status: 502 },
+                )
+              : jsonResponse(
+                  {
+                    error: "samva_send_failed",
+                    message: String(error),
+                  },
+                  { status: 500 },
+                ),
           onSuccess: (response) => response,
         }),
         Effect.provide(SamvaLayer),

@@ -2,8 +2,8 @@
 
 Use the `samva/effect` entrypoint when your app already runs on
 [Effect](https://effect.website). It gives you an Effect-native Samva client:
-typed errors, `Effect.retry` with `Schedule`, and `Layer`-provided dependencies
-over the fetch HTTP client.
+semantic tagged errors, default-on retry with idempotent sends, and
+`Layer`-provided dependencies over the fetch HTTP client.
 
 If you are not using Effect, use the plain `samva` client instead. The payload is
 the same; this cookbook focuses on the Effect runtime shape.
@@ -11,7 +11,7 @@ the same; this cookbook focuses on the Effect runtime shape.
 ## Setup
 
 ```sh
-bun add samva effect@4.0.0-beta.85
+bun add samva effect@4.0.0-beta.98
 ```
 
 Keep `SAMVA_API_KEY` server-side only. The Effect SDK currently imports
@@ -79,24 +79,26 @@ Use `SamvaClient.layer(config)` instead when you want to provide your own
 
 ## Typed errors
 
-Generated errors are tagged by operation and status, such as
-`MessagesSend429`, not by the inner cause tag. Match the wrapper tag and then
-read `cause` for the status-specific payload.
+The client is derived from the same API contract the Samva API serves, so
+every operation fails with the server's own semantic tagged errors —
+`RateLimitedError`, `ValidationError`, `UnauthorizedError`, and so on — directly
+in the Effect error channel. Match them by tag and read each error's own fields.
+There is no per-status wrapper and no `cause` to unwrap.
 
 ```ts
 import { Effect } from "effect";
 
 const handled = sendWelcome("ada@example.com").pipe(
   Effect.catchTags({
-    MessagesSend429: (error) =>
+    RateLimitedError: (error) =>
       Effect.succeed({
-        retryAfterSeconds: error.cause.retryAfterSeconds,
+        retryAfterSeconds: error.retryAfterSeconds,
       }),
-    MessagesSend422: (error) =>
+    ValidationError: (error) =>
       Effect.succeed({
-        validationFields: error.cause.fields ?? {},
+        validationFields: error.fields ?? {},
       }),
-    MessagesSend401: () =>
+    UnauthorizedError: () =>
       Effect.succeed({
         configurationError: "SAMVA_API_KEY is invalid or missing permissions.",
       }),
@@ -104,44 +106,76 @@ const handled = sendWelcome("ada@example.com").pipe(
 );
 ```
 
-For `email.send`, the status union also includes `MessagesSend402`,
-`MessagesSend403`, `MessagesSend404`, `MessagesSend409`, `MessagesSend500`, and
-`MessagesSend502`. Keep the common send path focused on actionable errors:
-credentials, validation, rate limiting, and transient server failures.
+`retryAfterSeconds` is always a finite number, and `ValidationError.fields` is a
+`Record<string, string[]>` keyed by field name.
 
-`RateLimitedError.retryAfterSeconds` can be a finite number or a non-finite
-sentinel string from OpenAPI decoding. Check it before using it as a delay:
-
-```ts
-const retryAfter =
-  typeof error.cause.retryAfterSeconds === "number" &&
-  Number.isFinite(error.cause.retryAfterSeconds)
-    ? error.cause.retryAfterSeconds
-    : undefined;
-```
-
-## Retry with Schedule
-
-Retry transient wrapper tags and fail fast on validation or credentials errors.
-`Schedule.recurs(3)` allows three retries after the first attempt.
+Rather than enumerate tags, you can handle a whole category at once. The SDK
+exports `catchAuthError`, `catchValidationError`, `catchNotFoundError`,
+`catchConflictError`, `catchThrottlingError`, `catchBillingError`, and
+`catchTransient`, plus the matching `isAuthError` / `isRetryable` / `isTransient`
+predicates. `catchAuthError` covers both `UnauthorizedError` and
+`ForbiddenError`:
 
 ```ts
-import { Effect, Schedule } from "effect";
+import { Effect } from "effect";
+import { catchAuthError, isRetryable } from "samva/effect";
 
-const retryableSend = sendWelcome("ada@example.com").pipe(
-  Effect.retry({
-    schedule: Schedule.exponential("200 millis").pipe(Schedule.jittered),
-    times: 3,
-    while: (error) =>
-      error._tag === "MessagesSend429" ||
-      error._tag === "MessagesSend500" ||
-      error._tag === "MessagesSend502",
+const handledByCategory = sendWelcome("ada@example.com").pipe(
+  catchAuthError(() => Effect.succeed({ configurationError: "SAMVA_API_KEY is unusable." })),
+  Effect.match({
+    onFailure: (error) => (isRetryable(error) ? "upstream_unavailable" : "failed"),
+    onSuccess: (result) => result,
   }),
 );
 ```
 
-You can still catch `MessagesSend429` after retries are exhausted and include a
-`retryAfterSeconds` hint in your HTTP response.
+Timestamps decode to real `Date` values, so `message.createdAt` is a `Date` — no
+string parsing:
+
+```ts
+const message = await Effect.runPromise(
+  sendWelcome("ada@example.com").pipe(Effect.provide(SamvaLayer)),
+);
+console.log(message.createdAt.toISOString());
+```
+
+## Default-on retry
+
+Retry-safe operations retry on their own, so you do not wrap calls in
+`Effect.retry`. Reads and sends retry on throttling (`429`), transient server
+errors, and request-transport failures with jittered exponential backoff bounded
+to four attempts; a `429` waits for the server's `retryAfterSeconds` hint (capped
+at 60s). Keyless mutating calls are never auto-retried.
+
+Because retry is built in, a `RateLimitedError` or `InternalError` that reaches
+your handler means retrying already failed to recover.
+
+Override or disable the policy with the `SamvaRetry` Layer:
+
+```ts
+import { Effect } from "effect";
+import { SamvaRetry, isRetryable } from "samva/effect";
+
+// No auto-retry for this program:
+sendWelcome("ada@example.com").pipe(Effect.provide(SamvaRetry.layerDisabled));
+
+// Or a custom policy, using any Effect.retry options:
+sendWelcome("ada@example.com").pipe(
+  Effect.provide(SamvaRetry.layer({ times: 6, while: isRetryable })),
+);
+```
+
+## Idempotency keys
+
+Every `email.send` / `messages.send` generates an `Idempotency-Key` per call,
+stable across the built-in retries, so a retried send never delivers twice. Pass
+your own key to deduplicate a send you might replay from another process. Reusing
+a key with identical content replays the original response; reusing it with
+different content fails with `ConflictError`.
+
+```ts
+samva.email.send(input, { idempotencyKey: "order-4417-receipt" });
+```
 
 ## React Email
 
@@ -200,8 +234,9 @@ export default {
 The [`examples/effect-sdk`](../examples/effect-sdk) app includes:
 
 - `src/send.ts` - a first-send script with `createClient`.
-- `src/server.ts` - a fetch handler with `SamvaClient.layerFetch`, typed error to
-  HTTP mapping, and retries.
+- `src/server.ts` - a fetch handler with `SamvaClient.layerFetch`, semantic
+  tagged errors and `catchAuthError` mapped to HTTP responses, and `isRetryable`
+  splitting exhausted-retry failures from unexpected ones.
 - loud `SAMVA_API_KEY` validation.
 - escaping for user text before it is placed into HTML.
 
@@ -213,9 +248,10 @@ your account. Configure senders at [samva.app](https://samva.app).
 **Where should the API key live?** Only on the server or in an edge environment
 binding. Do not expose it to browser code.
 
-**Why are the error tags named `MessagesSend429`?** `email.send` is an ergonomic
-wrapper over the generated `messages.send` endpoint. The generated Effect client
-tags errors by operation and status.
+**Do I need to add my own retries?** No. Reads and sends retry on throttling and
+transient failures out of the box, and sends stay safe under retry because they
+carry an `Idempotency-Key`. Wrapping a call in `Effect.retry` nests your policy
+on top of the built-in one; use `SamvaRetry.layer` to change it instead.
 
 **Can I receive webhooks here too?** Receiving and verifying Samva webhooks is a
 separate concern. Use the `samva/webhooks` SDK export or the webhook cookbook
