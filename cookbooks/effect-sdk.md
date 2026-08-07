@@ -11,7 +11,7 @@ the same; this cookbook focuses on the Effect runtime shape.
 ## Setup
 
 ```sh
-bun add samva effect@4.0.0-beta.98
+bun add samva effect@4.0.0-beta.102
 ```
 
 Keep `SAMVA_API_KEY` server-side only. The Effect SDK currently imports
