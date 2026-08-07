@@ -44,7 +44,7 @@ passes `(request, env, ctx)` to Hono's `app.fetch`, and Hono exposes `env` as
 
 ```ts
 import { Hono } from "hono";
-import { createClient } from "samva";
+import { createClient, SamvaApiError, SamvaTransportError } from "samva";
 
 type Bindings = {
   SAMVA_API_KEY: string;
@@ -104,24 +104,23 @@ app.post("/send", async (c) => {
   }
 
   const samva = createClient({ apiKey });
-  const { data, error } = await samva.messages.send({
-    to: [{ email: recipientEmail }],
-    channel: "email",
-    email: {
-      subject: emailSubject,
-      html: readString(html) || "<p>Hello from Hono on Cloudflare Workers.</p>",
-      text: readString(text) || undefined,
-    },
-  });
+  try {
+    const message = await samva.messages.send({
+      to: [{ email: recipientEmail }],
+      channel: "email",
+      email: {
+        subject: emailSubject,
+        html: readString(html) || "<p>Hello from Hono on Cloudflare Workers.</p>",
+        text: readString(text) || undefined,
+      },
+    });
 
-  if (error) {
-    return c.json(
-      { ok: false, error: error instanceof Error ? error.message : String(error) },
-      502,
-    );
+    return c.json({ ok: true, id: message.id });
+  } catch (error) {
+    if (!(error instanceof SamvaApiError) && !(error instanceof SamvaTransportError)) throw error;
+
+    return c.json({ ok: false, error: error.message }, 502);
   }
-
-  return c.json({ ok: true, id: data?.id });
 });
 
 export default app;
@@ -200,7 +199,7 @@ bun add @react-email/render react react-dom
 ```tsx
 import { render, toPlainText } from "@react-email/render";
 import { Hono } from "hono";
-import { createClient } from "samva";
+import { createClient, SamvaApiError, SamvaTransportError } from "samva";
 import WelcomeEmail from "./emails/welcome-email";
 
 type Bindings = {
@@ -218,24 +217,23 @@ app.post("/welcome", async (c) => {
   }
 
   const samva = createClient({ apiKey });
-  const { data, error } = await samva.messages.send({
-    to: [{ email: "ada@example.com" }],
-    channel: "email",
-    email: {
-      subject: "Welcome",
-      html,
-      text: toPlainText(html),
-    },
-  });
+  try {
+    const message = await samva.messages.send({
+      to: [{ email: "ada@example.com" }],
+      channel: "email",
+      email: {
+        subject: "Welcome",
+        html,
+        text: toPlainText(html),
+      },
+    });
 
-  if (error) {
-    return c.json(
-      { ok: false, error: error instanceof Error ? error.message : String(error) },
-      502,
-    );
+    return c.json({ ok: true, id: message.id });
+  } catch (error) {
+    if (!(error instanceof SamvaApiError) && !(error instanceof SamvaTransportError)) throw error;
+
+    return c.json({ ok: false, error: error.message }, 502);
   }
-
-  return c.json({ ok: true, id: data?.id });
 });
 ```
 

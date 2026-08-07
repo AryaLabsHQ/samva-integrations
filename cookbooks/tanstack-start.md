@@ -97,9 +97,9 @@ Standard Schema validators, so Zod, Valibot, and ArkType all fit. Zod is used
 here because it is common and direct. Older TanStack Start examples may show
 `.inputValidator()`; current Start builds warn in favor of `.validator()`.
 
-`samva.messages.send()` returns the SDK response envelope. For a form flow,
-return your own small app response such as `{ ok: true }`; read `response.data`
-only when your UI needs fields from the send response.
+`samva.messages.send()` returns the decoded message and throws typed SDK errors.
+For a form flow, return your own small app response such as `{ ok: true }`;
+return fields from the message only when your UI needs them.
 
 ## Call it from a form
 
