@@ -291,18 +291,15 @@ Promise APIs are the default. The SDK also exposes `samva/effect` for Effect
 applications.
 
 ```ts
-import * as Effect from "effect/Effect";
-import * as FetchHttpClient from "effect/unstable/http/FetchHttpClient";
-import { createClient } from "samva/effect";
+import { Effect } from "effect";
+import { Client, Email } from "samva/effect";
 
-const program = Effect.gen(function* () {
-  const samva = yield* createClient({ apiKey: process.env.SAMVA_API_KEY! });
-  return yield* samva.messages.send({
-    to: [{ email: "ada@example.com" }],
-    channel: "email",
-    email: { subject: "Hello", html: "<p>Hello</p>", text: "Hello" },
-  });
-}).pipe(Effect.provide(FetchHttpClient.layer));
+const program = Email.send({
+  to: "ada@example.com",
+  subject: "Hello",
+  html: "<p>Hello</p>",
+  text: "Hello",
+}).pipe(Effect.provide(Client.layerFetch({ apiKey: process.env.SAMVA_API_KEY! })));
 ```
 
 Keep the same server-only and per-request env rules when you run this from
