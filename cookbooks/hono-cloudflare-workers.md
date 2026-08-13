@@ -1,8 +1,8 @@
 # Hono on Cloudflare Workers with Samva
 
-Send email from a [Hono](https://hono.dev) app running on
-[Cloudflare Workers](https://developers.cloudflare.com/workers/) with Samva. The
-Samva SDK uses `fetch`, so the send path runs on `workerd` without SMTP,
+Send email from a [Hono](https://hono.dev) app on
+[Cloudflare Workers](https://developers.cloudflare.com/workers/) with Samva.
+The Samva SDK uses `fetch`. The send path runs on `workerd` without SMTP,
 `nodemailer`, Node built-ins, or `nodejs_compat`.
 
 ## Setup
@@ -12,7 +12,7 @@ bun add hono samva
 bun add -d wrangler @cloudflare/workers-types typescript
 ```
 
-Use Workers bindings for secrets. In production:
+Store secrets in Workers bindings. In production, put the key with Wrangler:
 
 ```sh
 wrangler secret put SAMVA_API_KEY
@@ -24,8 +24,7 @@ For local development, keep a `.dev.vars` file next to `wrangler.jsonc`:
 SAMVA_API_KEY="samva_sk_live_..."
 ```
 
-Configure the Worker with a module entrypoint. You do not need
-`nodejs_compat`.
+Configure the Worker with a module entrypoint. You do not need `nodejs_compat`.
 
 ```jsonc
 {
@@ -38,9 +37,9 @@ Configure the Worker with a module entrypoint. You do not need
 
 ## The Worker seam
 
-Hono's app object is the Worker entrypoint: `export default app`. Cloudflare
-passes `(request, env, ctx)` to Hono's `app.fetch`, and Hono exposes `env` as
-`c.env` inside handlers.
+Hono's app object is the Worker entrypoint. Export it with `export default app`.
+Cloudflare passes `request`, `env`, and `ctx` to `app.fetch`.
+Hono exposes `env` as `c.env` inside handlers.
 
 ```ts
 import { Hono } from "hono";
@@ -57,14 +56,19 @@ app.get("/", (c) => c.text("samva + hono on workers"));
 export default app;
 ```
 
-Create the Samva client inside the handler from `c.env`. Do not read
-`process.env`, and do not construct a module-top client for a Worker secret.
+Create the Samva client inside the handler from `c.env`.
+Do not read `process.env`.
+Do not build a module-top client from a Worker secret.
 
 ## Route handler send
 
+The Promise client returns the decoded message. It throws on failure.
+Catch `SamvaApiError` and `SamvaTransportError`. Use `client.raw` only when you
+need the generated envelope.
+
 ```ts
 import { Hono } from "hono";
-import { createClient } from "samva";
+import { createClient, SamvaApiError, SamvaTransportError } from "samva";
 
 type Bindings = {
   SAMVA_API_KEY: string;
@@ -126,26 +130,24 @@ app.post("/send", async (c) => {
 export default app;
 ```
 
-There is no `from` field. Samva sends from the verified sender configured on
-your account.
+There is no `from` field. Samva sends from the verified sender on your account.
 
 ## Edge-native send path
 
-This route stays inside the Workers runtime:
+This route stays inside the Workers runtime.
 
 - Hono reads JSON and returns `Response` objects through Web APIs.
 - The Samva SDK sends over `fetch`.
 - The API key comes from a Worker secret binding.
-- No SMTP sockets, Node `crypto`, Node `fs`, or compatibility flags are needed.
+- The path needs no SMTP sockets, Node `crypto`, Node `fs`, or compatibility flags.
 
-## Await vs. waitUntil
+## Await or waitUntil
 
-For user-facing sends, await `samva.messages.send(...)` and return the result to
-the caller. That surfaces delivery API errors in the HTTP response.
+For user-facing sends, await `samva.messages.send(...)`.
+Return the message to the caller. That puts delivery API errors in the HTTP response.
 
-Use `c.executionCtx.waitUntil(...)` only when the request should return before
-the send finishes, such as an analytics-style notification or webhook side
-effect.
+Use `c.executionCtx.waitUntil(...)` only when the request should return first.
+Typical cases are analytics notices and webhook side effects.
 
 ```ts
 app.post("/send-background", async (c) => {
@@ -183,14 +185,13 @@ app.post("/send-background", async (c) => {
 });
 ```
 
-`waitUntil` extends work after the response, but the client will not see send
-errors. Keep the awaited path as the default for forms, admin actions, and API
-calls where the caller expects a real send result.
+`waitUntil` extends work after the response. The client will not see send errors.
+Keep the awaited path as the default for forms, admin actions, and API calls.
 
 ## React Email on Workers
 
-React Email's render package has an edge build for `workerd`. Render to HTML,
-derive a text fallback, then send the strings with Samva.
+React Email's render package has an edge build for `workerd`.
+Render to HTML. Derive a text fallback. Then send the strings with Samva.
 
 ```sh
 bun add @react-email/render react react-dom
@@ -242,16 +243,14 @@ For components, Tailwind, preview workflows, and text strategies, use the
 
 ## Webhook receiver shape
 
-When you receive Samva webhooks in a Worker, read the raw body before any JSON
-parsing. Signature verification is intentionally not hand-rolled here; use the
-`samva/webhooks` SDK subpath.
+When you receive Samva webhooks in a Worker, read the raw body first.
+Do not parse JSON before verification. Use the `samva/webhooks` SDK subpath.
 
 ```ts
 app.post("/webhooks/samva", async (c) => {
   const payload = await c.req.text();
   const signature = c.req.header("x-webhook-signature");
 
-  // TODO(wave 3): verify payload and signature with samva/webhooks.
   void payload;
   void signature;
 
@@ -259,24 +258,26 @@ app.post("/webhooks/samva", async (c) => {
 });
 ```
 
+This snippet only shows the route. Verify the signature before you trust the event.
+
 ## FAQ
 
-**Why no `from`?** Samva sends from the verified sender configured on your
-account. Your Worker only supplies recipients and email content.
+**Why no `from`?** Samva sends from the verified sender on your account.
+Your Worker only supplies recipients and email content.
 
-**Can I use `process.env.SAMVA_API_KEY`?** Not on Workers. Put the secret in
-Wrangler and read `c.env.SAMVA_API_KEY` inside the handler.
+**Can I use `process.env.SAMVA_API_KEY`?** Not on Workers.
+Put the secret in Wrangler and read `c.env.SAMVA_API_KEY` inside the handler.
 
-**Should sends use `waitUntil`?** Usually no. Await the send when a user or API
-caller needs to know whether it worked. Use `waitUntil` for background side
-effects where the response should be returned immediately.
+**Should sends use `waitUntil`?** Usually no.
+Await the send when a user or API caller needs to know whether it worked.
+Use `waitUntil` for background side effects where the response should return now.
 
 **How do I send many emails?** Put the work behind a queue or batch process.
 Keep the request handler focused on one user-facing send.
 
-**Can I use the Effect-native SDK?** Yes. `samva/effect` can run with a
-fetch-backed HTTP client, but this cookbook uses the promises client because it
-is the shortest Hono route-handler shape.
+**Can I use the Effect-native SDK?** Yes.
+`samva/effect` can run with a fetch-backed HTTP client.
+This cookbook uses the Promise client because it is the shortest Hono route shape.
 
 ## Example
 

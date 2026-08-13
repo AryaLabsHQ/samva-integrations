@@ -1,8 +1,8 @@
 # Better Auth with Samva
 
-`@samva/better-auth` sends Better Auth transactional email through Samva. It
-provides callback fragments for manual wiring and a `withSamva()` transformer
-for the common setup.
+`@samva/better-auth` sends Better Auth transactional email through Samva.
+It provides callback fragments for manual wiring.
+It also provides a `withSamva()` transformer for the common setup.
 
 ## Install
 
@@ -41,10 +41,11 @@ export const auth = betterAuth(
 );
 ```
 
-`withSamva()` fills missing email verification and password reset callbacks,
-fills change-email and delete-account callbacks when those user flows are
-already enabled, and appends only the plugins you enable. Existing callbacks are
-preserved.
+`withSamva()` fills missing email verification and password reset callbacks.
+It fills change-email and delete-account callbacks when those user flows are
+already enabled.
+It appends only the plugins you enable.
+Existing callbacks are preserved.
 
 ## Use callback fragments
 
@@ -67,7 +68,7 @@ export const auth = betterAuth({
 
 ## Customize templates
 
-Default templates exist for all eight Better Auth email triggers:
+Default templates exist for all eight Better Auth email triggers.
 
 - `verification`
 - `resetPassword`
@@ -97,8 +98,9 @@ const samva = samvaEmail({
 ```
 
 Template functions may return HTML, `{ subject, html, text }`, or a React Email
-element. React Email rendering is optional and uses `@react-email/render` when a
-template returns an element.
+element.
+React Email rendering is optional.
+It uses `@react-email/render` when a template returns an element.
 
-Samva sends from the verified sender configured on your account, so there is no
-`from` field.
+Samva sends from the verified sender on your account.
+There is no `from` field.

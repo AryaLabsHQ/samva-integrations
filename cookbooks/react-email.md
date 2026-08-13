@@ -1,12 +1,12 @@
 # React Email with Samva
 
-[React Email](https://react.email) gives you a real React component model for
-HTML email — typed props, reusable components, and Tailwind — instead of
-hand-written table markup. Samva is the **"samva"** entry in its provider
-matrix: render a template to HTML, then send it with the
-[Samva](https://samva.app) SDK.
+[React Email](https://react.email) gives you a React component model for HTML
+email. You get typed props, reusable components, and Tailwind instead of
+hand-written table markup.
+Samva is the `samva` entry in its provider matrix.
+Render a template to HTML. Then send it with the [Samva](https://samva.app) SDK.
 
-React Email is your dependency (it renders); Samva sends the rendered string.
+React Email is your dependency. It renders. Samva sends the rendered string.
 Neither locks you into the other.
 
 ## Setup
@@ -15,13 +15,14 @@ Neither locks you into the other.
 bun add react-email react react-dom samva
 ```
 
-`react-email` is the canonical v6 package — one install gives you the components
-(`<Tailwind>`, `<Button>`, …), the `render` / `toPlainText` helpers, and the
-`email` CLI. Keep your `SAMVA_API_KEY` server-side only.
+`react-email` is the canonical v6 package.
+One install gives you the components such as `<Tailwind>` and `<Button>`,
+the `render` and `toPlainText` helpers, and the `email` CLI.
+Keep your `SAMVA_API_KEY` on the server only.
 
-> Don't want the CLI? Import components from `@react-email/components` and
-> `render` / `toPlainText` from `@react-email/render` instead — the code below is
-> identical, just sourced from those two packages.
+If you do not want the CLI, import components from `@react-email/components`.
+Import `render` and `toPlainText` from `@react-email/render`.
+The code below is identical. It is only sourced from those two packages.
 
 ## Render a template and send it
 
@@ -41,13 +42,14 @@ await samva.messages.send({
 });
 ```
 
-`render` is **async** — always `await` it. Samva sends from the verified sender
-configured on your account, so there is **no `from`** field in the payload.
+`render` is async. Always `await` it.
+Samva sends from the verified sender on your account.
+There is no `from` field in the payload.
 
 ## Add a plain-text part
 
-Every email should carry a text alternative. `toPlainText` derives one from the
-rendered HTML:
+Every email should carry a text alternative.
+`toPlainText` derives one from the rendered HTML.
 
 ```tsx
 import { render, toPlainText } from "react-email";
@@ -62,13 +64,13 @@ await samva.messages.send({
 });
 ```
 
-You can also render text directly with the option:
+You can also render text directly with the option
 `await render(<VerifyEmail url={url} />, { plainText: true })`.
 
 ## A styled template with Tailwind
 
-Wrap the email in `<Tailwind>` and style with utility classes — React Email
-inlines them into email-safe CSS at render time:
+Wrap the email in `<Tailwind>` and style with utility classes.
+React Email inlines them into email-safe CSS at render time.
 
 ```tsx
 import {
@@ -114,20 +116,22 @@ export const VerifyEmail = ({ url, name }: VerifyEmailProps) => (
 export default VerifyEmail;
 ```
 
-The full template — link fallback, divider, and footer — lives in the
+The full template, including link fallback, divider, and footer, lives in the
 [`react-email-samva` example](../examples/react-email-samva).
 
 ## Preview while you build
 
-With `react-email` installed, the `email` CLI is available locally:
+With `react-email` installed, the `email` CLI is available locally.
 
 ```sh
-bunx email dev       # live preview at http://localhost:3000
-bunx email export    # write the rendered .html to disk
+bunx email dev
+bunx email export
 ```
 
-`email dev` watches your `emails/` directory and hot-reloads. Attach sample data
-so a template renders on its own:
+`email dev` opens a live preview at `http://localhost:3000`.
+`email export` writes the rendered `.html` to disk.
+`email dev` watches your `emails/` directory and hot-reloads.
+Attach sample data so a template renders on its own.
 
 ```tsx
 VerifyEmail.PreviewProps = {
@@ -140,9 +144,10 @@ See the [React Email docs](https://react.email/docs) for the full component set.
 
 ## Render on the edge
 
-`render` needs no Node built-ins, and the Samva SDK is `fetch`-based, so you can
-render and send end-to-end from a Cloudflare Worker, Vercel Edge function, or any
-edge runtime:
+`render` needs no Node built-ins.
+The Samva SDK is `fetch`-based.
+You can render and send end-to-end from a Cloudflare Worker, a Vercel Edge
+function, or any edge runtime.
 
 ```ts
 import { render, toPlainText } from "react-email";
@@ -163,21 +168,23 @@ export default {
 };
 ```
 
-To render React Email from a framework route — a Next.js Route Handler or Server
-Action — see the [Next.js cookbook](./nextjs.md).
+To render React Email from a framework route such as a Next.js Route Handler or
+Server Action, see the [Next.js cookbook](./nextjs.md).
 
 ## FAQ
 
-**Why no `from`?** Samva sends from the verified domain/sender on your account,
-so the sender is never in the payload. Configure senders at
+**Why no `from`?** Samva sends from the verified domain or sender on your
+account, so the sender is never in the payload. Configure senders at
 [samva.app](https://samva.app).
 
-**`render` returns a Promise.** It is async in v6 — `await` it. Calling it
-without `await` yields a `Promise`, not a string.
+**`render` returns a Promise.** It is async in v6. `await` it.
+Calling it without `await` yields a `Promise`, not a string.
 
-**HTML vs. text.** Send `html` for the rich version and `text` (from
-`toPlainText`) as the fallback; many clients and spam filters prefer a text part.
+**HTML vs text.** Send `html` for the rich version.
+Send `text` from `toPlainText` as the fallback.
+Many clients and spam filters prefer a text part.
 
-**Does the edge runtime need the CLI?** No. The `email` CLI is a build-time tool;
-at runtime you only import `render` / `toPlainText`, which run on Workers and Edge
-directly.
+**Does the edge runtime need the CLI?** No.
+The `email` CLI is a build-time tool.
+At runtime you only import `render` and `toPlainText`.
+Those run on Workers and Edge directly.

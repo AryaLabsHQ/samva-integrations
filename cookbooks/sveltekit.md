@@ -1,8 +1,9 @@
 # Send email from SvelteKit with Samva
 
-Use the `samva` SDK directly from SvelteKit server code: form actions for
-in-app forms and `+server.ts` endpoints for JSON clients. Samva sends from the
-verified sender configured on your account, so the payload has no `from` field.
+Use the `samva` SDK from SvelteKit server code.
+Use form actions for in-app forms. Use `+server.ts` endpoints for JSON clients.
+Samva sends from the verified sender on your account.
+The payload has no `from` field.
 
 ## Setup
 
@@ -23,9 +24,9 @@ SAMVA_API_KEY=samva_sk_live_your_key_here
 SAMVA_SEND_TOKEN=replace-with-a-random-route-token
 ```
 
-Create a Samva client helper in `src/lib/server`. Modules under `src/lib/server` and
-`$env/*/private` are server-only by construction; importing either from client
-code is a build error.
+Create a Samva client helper in `src/lib/server`.
+Modules under `src/lib/server` and `$env/*/private` are server-only by
+construction. Importing either from client code is a build error.
 
 ```ts
 // src/lib/server/samva.ts
@@ -59,8 +60,9 @@ const escapeHtml = (value: string): string =>
 
 ## Form action
 
-Use a form action for app-owned forms. It works without client JavaScript and
-can be progressively enhanced with `use:enhance`.
+Use a form action for app-owned forms.
+It works without client JavaScript.
+You can progressively enhance it with `use:enhance`.
 
 ```ts
 // src/routes/contact/+page.server.ts
@@ -197,21 +199,26 @@ export const POST: RequestHandler = async ({ request }) => {
 };
 ```
 
-The endpoint awaits `samva.messages.send()`. Do not return success before the
-send promise settles unless you have intentionally queued the work elsewhere.
+The endpoint awaits `samva.messages.send()`.
+Do not return success before the send promise settles unless you have queued the
+work elsewhere.
 
 ## Edge and Cloudflare Workers
 
-The Samva SDK uses `fetch`, so the send path works with
-`@sveltejs/adapter-cloudflare` and other Web runtime hosts. The code around the
-send decides compatibility: avoid Node-only database drivers, filesystem access,
-SMTP-over-TCP, and `node:crypto` in Workers handlers.
+The Samva SDK uses `fetch`.
+The send path works with `@sveltejs/adapter-cloudflare` and other Web runtime
+hosts.
+The code around the send decides compatibility.
+Avoid Node-only database drivers, filesystem access, SMTP-over-TCP, and
+`node:crypto` in Workers handlers.
 
-Prefer `$env/dynamic/private` for runtime secrets and `$env/static/private` only
-when the key is present during build/typecheck; the SvelteKit Cloudflare adapter
-recommends `$env` modules for environment variables. If your key is available
-only as a Worker binding, construct the client per request from `platform.env`
-instead of importing the module-scope client:
+Prefer `$env/dynamic/private` for runtime secrets.
+Use `$env/static/private` only when the key is present during build and
+typecheck.
+The SvelteKit Cloudflare adapter recommends `$env` modules for environment
+variables.
+If your key is available only as a Worker binding, construct the client per
+request from `platform.env` instead of importing the module-scope client.
 
 ```ts
 import { error, json } from "@sveltejs/kit";
@@ -246,9 +253,9 @@ declare global {
 
 ## React Email
 
-React Email renders a component to the `html` string Samva sends. Keep the full
-template workflow in the [React Email cookbook](./react-email.md); the SvelteKit
-seam is just render, derive text, send.
+React Email renders a component to the `html` string Samva sends.
+Keep the full template workflow in the [React Email cookbook](./react-email.md).
+The SvelteKit seam is render, derive text, then send.
 
 ```tsx
 import { render, toPlainText } from "react-email";
@@ -267,8 +274,8 @@ await getSamva().messages.send({
 
 ## Auth.js magic links
 
-`@auth/sveltekit` email sign-in is another server-side send seam. Auth.js owns
-the verification token and magic-link URL; Samva owns delivery.
+`@auth/sveltekit` email sign-in is another server-side send seam.
+Auth.js owns the verification token and magic-link URL. Samva owns delivery.
 
 ```ts
 // src/auth.ts
@@ -301,31 +308,35 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 ```
 
 Auth.js email providers require a user-owned database adapter for verification
-token storage. When porting a Resend or Nodemailer provider, do not pass
-`provider.from` to Samva.
+token storage.
+When you port a Resend or Nodemailer provider, do not pass `provider.from` to
+Samva.
 
-For deeper Auth.js wiring and React Email templates, see the Auth.js cookbook.
+For deeper Auth.js wiring and React Email templates, see the
+[Auth.js cookbook](./authjs.md).
 
 ## FAQ
 
 **Form action or `+server.ts`?** Use a form action for SvelteKit-owned forms.
 Use `+server.ts` for JSON clients, external services, and webhook endpoints.
 
-**Where is `from`?** Samva sends from the verified sender configured on your
-account at [samva.app](https://samva.app). Do not add a `from` field.
+**Where is `from`?** Samva sends from the verified sender on your account at
+[samva.app](https://samva.app). Do not add a `from` field.
 
 **`$env/static/private` or `$env/dynamic/private`?** Use dynamic for cloneable
-examples and hosts that inject secrets at runtime. Use static when the value is
-available to SvelteKit during build/typecheck and you want compile-time
-replacement. Both are server-only.
+examples and hosts that inject secrets at runtime.
+Use static when the value is available to SvelteKit during build and typecheck
+and you want compile-time replacement.
+Both are server-only.
 
-**Can I fire-and-forget?** Usually no. Await transactional sends so the UI or
-API caller knows whether Samva accepted the message. Use a queue or the host's
-background primitive for non-user-facing work.
+**Can I fire-and-forget?** Usually no.
+Await transactional sends so the UI or API caller knows whether Samva accepted
+the message.
+Use a queue or the host's background primitive for non-user-facing work.
 
-**Can I send from `load`?** Do not send from `load`; it may rerun during
-navigation, invalidation, or preloading. Send from actions, endpoints, hooks, or
-background jobs.
+**Can I send from `load`?** Do not send from `load`.
+It may rerun during navigation, invalidation, or preloading.
+Send from actions, endpoints, hooks, or background jobs.
 
 **What about webhooks?** Receiving and verifying Samva webhooks is a separate
 flow. See the [webhooks guide](https://samva.app/docs/integrations/webhooks)

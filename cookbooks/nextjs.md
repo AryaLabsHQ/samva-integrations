@@ -1,9 +1,10 @@
 # Send email from Next.js with Samva
 
-Use the `samva` SDK directly from Next.js server code: Server Actions for forms,
-Route Handlers for HTTP endpoints, and Pages Router API routes for older apps.
-Samva sends from the verified sender configured on your account, so the payload
-has no `from` field.
+Use the `samva` SDK from Next.js server code.
+Use Server Actions for forms. Use Route Handlers for HTTP endpoints.
+Use Pages Router API routes for older apps.
+Samva sends from the verified sender on your account.
+The payload has no `from` field.
 
 ## Setup
 
@@ -34,7 +35,7 @@ Add the key to `.env.local`:
 SAMVA_API_KEY=samva_sk_live_...
 ```
 
-Escape user-controlled strings before putting them in HTML:
+Escape user-controlled strings before you put them in HTML:
 
 ```ts
 // lib/email-html.ts
@@ -49,8 +50,8 @@ export const escapeHtml = (value: string): string =>
 
 ## Server Action
 
-Server Actions are the best default for in-app forms because the browser can
-submit a `<form>` directly to server code.
+Server Actions are the best default for in-app forms.
+The browser can submit a `<form>` directly to server code.
 
 ```ts
 // app/contact/actions.ts
@@ -95,8 +96,8 @@ export async function sendContactEmail(
 }
 ```
 
-Use `useActionState` for the form state and `useFormStatus` for the pending
-button state:
+Use `useActionState` for the form state. Use `useFormStatus` for the pending
+button state.
 
 ```tsx
 // app/contact/contact-form.tsx
@@ -131,6 +132,7 @@ export function ContactForm() {
 ## Route Handler
 
 Use a Route Handler when another service or client needs a JSON endpoint.
+The Promise client returns the decoded message and throws on failure.
 
 ```ts
 // app/api/send/route.ts
@@ -157,9 +159,8 @@ export async function POST(request: Request) {
 
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
 
-  let result;
   try {
-    result = await samva.messages.send({
+    const messageResult = await samva.messages.send({
       to: [{ email }],
       channel: "email",
       email: {
@@ -168,22 +169,21 @@ export async function POST(request: Request) {
         text: `Thanks for reaching out.\n\n${message}`,
       },
     });
+    return Response.json({ ok: true, id: messageResult.id });
   } catch {
     return Response.json({ ok: false, error: "Failed to send message." }, { status: 502 });
   }
-
-  return Response.json({ ok: true, result });
 }
 ```
 
-The SDK is fetch-based, so the send path can run in the Edge runtime. Keep
-Node-only dependencies, database drivers, and filesystem access out of edge
+The SDK is fetch-based, so the send path can run in the Edge runtime.
+Keep Node-only dependencies, database drivers, and filesystem access out of edge
 handlers.
 
 ## React Email
 
-Render React Email to HTML, then pass the strings to Samva. The deep templating
-workflow lives in the [React Email cookbook](./react-email.md).
+Render React Email to HTML. Then pass the strings to Samva.
+The deep templating workflow lives in the [React Email cookbook](./react-email.md).
 
 ```tsx
 import { render, toPlainText } from "react-email";
@@ -202,8 +202,8 @@ await samva.messages.send({
 
 ## Pages Router
 
-If your app still uses the Pages Router, keep the same server-only Samva client
-and call it from `pages/api`.
+If your app still uses the Pages Router, keep the same server-only Samva client.
+Call it from `pages/api`.
 
 ```ts
 // pages/api/send.ts
@@ -226,7 +226,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const safeMessage = escapeHtml(message).replaceAll("\n", "<br />");
 
   try {
-    const result = await samva.messages.send({
+    const messageResult = await samva.messages.send({
       to: [{ email }],
       channel: "email",
       email: {
@@ -236,24 +236,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    return res.status(200).json({ ok: true, result });
+    return res.status(200).json({ ok: true, id: messageResult.id });
   } catch {
     return res.status(502).json({ ok: false, error: "failed to send email" });
   }
 }
 ```
 
-## Edge vs. Node
+## Edge vs Node
 
-Samva's client uses `fetch`, so sending email works from Next.js Node routes,
+Samva's client uses `fetch`. Sending email works from Next.js Node routes,
 Edge Route Handlers, Vercel Edge functions, Cloudflare Workers, and other Web
 runtime hosts. Runtime compatibility is usually decided by the code around the
-send:
+send.
 
-- choose Edge when your handler only uses Web APIs and fetch-based dependencies;
-- choose Node when your handler needs Node-only database drivers, filesystem
-  access, SMTP-over-TCP, or other Node built-ins;
-- do not send email during static generation or from middleware/proxy code.
+- Choose Edge when your handler only uses Web APIs and fetch-based dependencies.
+- Choose Node when your handler needs Node-only database drivers, filesystem
+  access, SMTP-over-TCP, or other Node built-ins.
+- Do not send email during static generation or from middleware or proxy code.
 
 ## FAQ
 
@@ -261,13 +261,12 @@ send:
 Next.js app. Use a Route Handler for JSON endpoints, webhooks, or calls from
 other services.
 
-**Can I fire-and-forget?** Transactional sends should usually be awaited so the
-UI or API caller knows whether Samva accepted the message. For bulk or
-post-response work, enqueue a job or use the host's background primitive
-(`waitUntil`, `after`, or an equivalent).
+**Can I fire-and-forget?** Await transactional sends so the UI or API caller
+knows whether Samva accepted the message. For bulk or post-response work, enqueue
+a job or use the host's background primitive such as `waitUntil` or `after`.
 
-**Where is `from`?** Samva sends from the verified sender configured on your
-account at [samva.app](https://samva.app). Do not add a `from` field.
+**Where is `from`?** Samva sends from the verified sender on your account at
+[samva.app](https://samva.app). Do not add a `from` field.
 
 **What about webhooks?** Receiving and verifying Samva webhooks is a separate
 flow. See the [webhooks guide](https://samva.app/docs/integrations/webhooks)

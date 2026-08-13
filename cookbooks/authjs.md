@@ -1,12 +1,14 @@
 # Auth.js with Samva
 
-Send Auth.js / NextAuth magic-link email through Samva by owning the email
-provider's `sendVerificationRequest` callback. Auth.js already has the right
-seam: clone the shape of its HTTP email providers and replace the provider API
-call with `samva.messages.send`.
+Send Auth.js and NextAuth magic-link email through Samva.
+Own the email provider's `sendVerificationRequest` callback.
+Auth.js already has the right seam.
+Clone the shape of its HTTP email providers.
+Replace the provider API call with `samva.messages.send`.
 
-This is a cookbook, not a package. Auth.js email providers are plain config
-objects, so there is no useful `@samva/authjs` wrapper to install.
+This is a cookbook, not a package.
+Auth.js email providers are plain config objects.
+There is no useful `@samva/authjs` wrapper to install.
 
 ## Install
 
@@ -20,21 +22,22 @@ Add React Email only when you want component-based templates:
 bun add react-email react react-dom
 ```
 
-Keep `SAMVA_API_KEY` server-side only. Auth.js also needs `AUTH_SECRET`; generate
-one with its CLI:
+Keep `SAMVA_API_KEY` server-side only.
+Auth.js also needs `AUTH_SECRET`. Generate one with its CLI:
 
 ```sh
 npx auth secret
 ```
 
-You do not need `EMAIL_FROM`. Samva sends from the verified sender configured on
-your account.
+You do not need `EMAIL_FROM`.
+Samva sends from the verified sender on your account.
 
 ## Create the provider
 
-`SamvaEmail()` is a custom Auth.js email provider. The provider-level `from`
-value is an empty string only because Auth.js' email provider type still carries
-that field; it is never sent to Samva.
+`SamvaEmail()` is a custom Auth.js email provider.
+The provider-level `from` value is an empty string only because Auth.js' email
+provider type still carries that field.
+It is never sent to Samva.
 
 ```ts
 import NextAuth from "next-auth";
@@ -80,11 +83,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 });
 ```
 
-Auth.js awaits `sendVerificationRequest`. If `samva.messages.send` rejects, the
-sign-in attempt fails instead of silently pretending the email was sent.
+Auth.js awaits `sendVerificationRequest`.
+If `samva.messages.send` rejects, the sign-in attempt fails.
+It does not silently pretend the email was sent.
 
 Email providers require a database adapter so Auth.js can store verification
-tokens. Choose the adapter for your application; Samva only handles the send.
+tokens.
+Choose the adapter for your application. Samva only handles the send.
 
 ## Add the route handler
 
@@ -98,8 +103,8 @@ Place that in `app/api/auth/[...nextauth]/route.ts`.
 
 ## Trigger sign-in
 
-Call the provider by its `id` from a server action. Auth.js reads the `email`
-field from the form data.
+Call the provider by its `id` from a server action.
+Auth.js reads the `email` field from the form data.
 
 ```tsx
 import { signIn } from "@/auth";
@@ -122,9 +127,10 @@ export function SignInForm() {
 ## Template with React Email
 
 For a richer magic-link email, render a React Email component before calling
-Samva. The deep React Email workflow lives in the
-[React Email cookbook](./react-email.md); the Auth.js-specific part is just
-`url -> html -> text -> messages.send`.
+Samva.
+The deep React Email workflow lives in the
+[React Email cookbook](./react-email.md).
+The Auth.js-specific part is `url` to `html` to `text` to `messages.send`.
 
 ```tsx
 import { Button, Html, Text } from "react-email";
@@ -163,12 +169,12 @@ async sendVerificationRequest({ identifier: to, url }) {
 }
 ```
 
-`render` is async; `toPlainText` is sync.
+`render` is async. `toPlainText` is sync.
 
 ## Already on Nodemailer?
 
 If your app already uses the Auth.js Nodemailer provider, you can override its
-`sendVerificationRequest` with the same Samva send:
+`sendVerificationRequest` with the same Samva send.
 
 ```ts
 import { createClient } from "samva";
@@ -194,26 +200,31 @@ Nodemailer({
 });
 ```
 
-The custom `SamvaEmail()` provider is the better default for Samva-only senders:
-no SMTP transport to configure, no required `EMAIL_SERVER`, and the send path is
-`fetch`-based. Use the Nodemailer override only as a migration bridge when the
-rest of the app is already built around that provider.
+The custom `SamvaEmail()` provider is the better default for Samva-only senders.
+There is no SMTP transport to configure.
+There is no required `EMAIL_SERVER`.
+The send path is `fetch`-based.
+Use the Nodemailer override only as a migration bridge when the rest of the app
+is already built around that provider.
 
 ## Notes and FAQ
 
 **Why no `from` or `EMAIL_FROM`?** Samva sends from the verified sender on your
-account, so the Samva payload has no `from` field. The empty provider-level
-`from` above exists only to satisfy Auth.js' email-provider shape.
+account, so the Samva payload has no `from` field.
+The empty provider-level `from` above exists only to satisfy Auth.js' email
+provider shape.
 
 **Does this run on the edge?** The Samva send is edge-safe because the SDK is
-`fetch`-based. The database adapter you choose for Auth.js verification-token
-storage is the runtime gate; many adapters need Node, or the split-config pattern
-with `auth.config.ts` for edge proxy/middleware and full `auth.ts` with the
-adapter elsewhere.
+`fetch`-based.
+The database adapter you choose for Auth.js verification-token storage is the
+runtime gate.
+Many adapters need Node.
+Or use the split-config pattern with `auth.config.ts` for edge proxy and
+middleware, and full `auth.ts` with the adapter elsewhere.
 
 **What about NextAuth v4?** v4's `EmailProvider` uses the same
-`sendVerificationRequest` seam, but the wiring differs; see the
-[Auth.js v5 migration guide](https://authjs.dev/getting-started/migrating-to-v5).
+`sendVerificationRequest` seam, but the wiring differs.
+See the [Auth.js v5 migration guide](https://authjs.dev/getting-started/migrating-to-v5).
 
 **Can I track delivery and bounces?** Use Samva webhooks for delivery events.
 The [Samva webhooks docs](https://samva.app/docs/integrations/webhooks) cover
