@@ -1,5 +1,5 @@
 import { Data, Effect } from "effect";
-import { SamvaClient, type SamvaClientConfig, catchAuthError, isRetryable } from "samva/effect";
+import { Client, Email, catchAuthError, isRetryable } from "samva/effect";
 
 import { readSamvaConfig } from "./config";
 import { renderMessageHtml } from "./html";
@@ -72,10 +72,10 @@ function parseJson(request: Request): Effect.Effect<unknown, RequestError> {
   });
 }
 
-export function createFetchHandler(config: SamvaClientConfig): {
+export function createFetchHandler(config: Client.Config): {
   readonly fetch: (request: Request) => Promise<Response>;
 } {
-  const SamvaLayer = SamvaClient.layerFetch(config);
+  const SamvaLayer = Client.layerFetch(config);
 
   return {
     fetch: (request) => {
@@ -91,13 +91,12 @@ export function createFetchHandler(config: SamvaClientConfig): {
       const program = Effect.gen(function* () {
         const body = yield* parseJson(request);
         const input = yield* parseSendRequest(body);
-        const samva = yield* SamvaClient;
 
         // Sends carry an Idempotency-Key and retry themselves on throttling and
         // transient failures, so a failure reaching the handlers below has
-        // already outlived the built-in backoff. Provide `SamvaRetry.layer` to
-        // tune the policy, or `SamvaRetry.layerDisabled` to opt out.
-        return yield* samva.email.send({
+        // already outlived the built-in backoff. Provide `Retry.layer` to
+        // tune the policy, or `Retry.layerDisabled` to opt out.
+        return yield* Email.send({
           to: input.to,
           subject: input.subject,
           html: renderMessageHtml(input.message),
@@ -145,7 +144,7 @@ export function createFetchHandler(config: SamvaClientConfig): {
               ),
             ),
         }),
-        // One handler for the whole auth category — `UnauthorizedError` and
+        // One handler for the whole auth category. `UnauthorizedError` and
         // `ForbiddenError` both mean the key is unusable, never the caller's fault.
         catchAuthError(() =>
           Effect.succeed(

@@ -1,6 +1,5 @@
 import { Effect } from "effect";
-import { FetchHttpClient } from "effect/unstable/http";
-import { createClient } from "samva/effect";
+import { Client, Email } from "samva/effect";
 
 import { readSamvaConfig } from "./config";
 import { renderMessageHtml } from "./html";
@@ -27,17 +26,13 @@ function readSendArgs(args: ReadonlyArray<string>): SendArgs {
 
 const options = readSendArgs(Bun.argv.slice(2));
 
-const program = Effect.gen(function* () {
-  const samva = yield* createClient(readSamvaConfig());
-
-  return yield* samva.email.send({
-    to: options.to,
-    subject: options.subject,
-    html: renderMessageHtml(options.message),
-    text: options.message,
-  });
+const program = Email.send({
+  to: options.to,
+  subject: options.subject,
+  html: renderMessageHtml(options.message),
+  text: options.message,
 }).pipe(
-  Effect.provide(FetchHttpClient.layer),
+  Effect.provide(Client.layerFetch(readSamvaConfig())),
   Effect.tapError((error) =>
     Effect.sync(() => {
       console.error("Samva send failed:", error);

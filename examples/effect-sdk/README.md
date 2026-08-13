@@ -1,6 +1,6 @@
 # Effect SDK example
 
-Send email with Samva's Effect-native SDK entrypoint.
+Send email with the `samva/effect` SDK entrypoint.
 
 ## Setup
 
@@ -10,11 +10,10 @@ cp examples/effect-sdk/.env.example examples/effect-sdk/.env
 ```
 
 Set `SAMVA_API_KEY` in `.env`. The key must belong to a Samva account with a
-verified sender; the email payload does not include `from`.
+verified sender. The email payload does not include `from`.
 
 This example pins `effect@4.0.0-beta.102`, matching the current `samva/effect`
-peer dependency. The HTTP transport import comes from `effect/unstable/http`
-while Effect 4 is in beta.
+peer dependency. `Client.layerFetch` uses the platform fetch client.
 
 ## Send from a script
 
@@ -22,7 +21,7 @@ while Effect 4 is in beta.
 bun run send --to ada@example.com --subject "Welcome" --message "Your workspace is ready."
 ```
 
-`src/send.ts` uses `createClient`, provides `FetchHttpClient.layer`, and runs the
+`src/send.ts` calls `Email.send`, provides `Client.layerFetch`, and runs the
 program with `Effect.runPromise`. Missing `SAMVA_API_KEY` throws before any send
 is attempted.
 
@@ -40,14 +39,13 @@ curl -sS http://localhost:3000 \
   -d '{"to":"ada@example.com","subject":"Welcome","message":"Your workspace is ready."}'
 ```
 
-`src/server.ts` builds `SamvaClient.layerFetch(config)` once, parses the JSON
+`src/server.ts` builds `Client.layerFetch(config)` once, parses the JSON
 body, escapes the plain-text `message` before placing it into HTML, and maps
 Samva's semantic tagged errors to HTTP responses:
 
 - `ValidationError` -> `400 validation_failed`, forwarding `error.fields`
 - `RateLimitedError` -> `429 rate_limited`, forwarding `error.retryAfterSeconds`
-- the auth category (`UnauthorizedError`, `ForbiddenError`), caught in one call
-  with `catchAuthError` -> `500 samva_configuration_error`
+- `UnauthorizedError` and `ForbiddenError` with `catchAuthError` -> `500 samva_configuration_error`
 
 Anything left over is split by `isRetryable`: a retryable failure that outlived
 the SDK's backoff answers `502 samva_unavailable`, everything else `500`.
@@ -55,7 +53,7 @@ the SDK's backoff answers `502 samva_unavailable`, everything else `500`.
 The handler does not wrap the send in `Effect.retry`. Sends carry an
 `Idempotency-Key` and retry themselves on throttling and transient failures, so
 a failure reaching those handlers has already exhausted the built-in backoff.
-Provide `SamvaRetry.layer` to tune that policy or `SamvaRetry.layerDisabled` to
+Provide `Retry.layer` to tune that policy or `Retry.layerDisabled` to
 turn it off.
 
 ## Validate the example
