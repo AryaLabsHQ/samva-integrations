@@ -12,7 +12,7 @@ cp examples/effect-sdk/.env.example examples/effect-sdk/.env
 Set `SAMVA_API_KEY` in `.env`. The key must belong to a Samva account with a
 verified sender; the email payload does not include `from`.
 
-This example pins `effect@4.0.0-beta.98`, matching the current `samva/effect`
+This example pins `effect@4.0.0-beta.102`, matching the current `samva/effect`
 peer dependency. The HTTP transport import comes from `effect/unstable/http`
 while Effect 4 is in beta.
 

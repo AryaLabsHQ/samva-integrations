@@ -43,7 +43,7 @@ Hono exposes `env` as `c.env` inside handlers.
 
 ```ts
 import { Hono } from "hono";
-import { createClient } from "samva";
+import { createClient, SamvaApiError, SamvaTransportError } from "samva";
 
 type Bindings = {
   SAMVA_API_KEY: string;
