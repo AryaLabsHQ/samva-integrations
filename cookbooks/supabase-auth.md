@@ -1,13 +1,15 @@
 # Supabase Auth Send Email Hook with Samva
 
 Use a Supabase Auth Send Email Hook when you want Supabase to keep owning
-authentication while Samva sends the transactional email. Supabase calls an HTTP
-endpoint you control; that endpoint verifies the signed raw body, renders a
-template, calls `samva.messages.send`, and returns an empty `200`.
+authentication while Samva sends the transactional email.
+Supabase calls an HTTP endpoint you control.
+That endpoint verifies the signed raw body, renders a template, calls
+`samva.messages.send`, and returns an empty `200`.
 
 This replaces Supabase's built-in email and Custom SMTP path for the covered auth
-flows. There is no SMTP host, username, password, or `from` in the Samva send
-call. Samva sends from the verified sender configured on your account.
+flows.
+There is no SMTP host, username, password, or `from` in the Samva send call.
+Samva sends from the verified sender on your account.
 
 The runnable example lives in
 [`examples/supabase-auth-hook`](../examples/supabase-auth-hook).
@@ -66,13 +68,14 @@ Serve the function with JWT verification disabled:
 supabase functions serve send-email --no-verify-jwt
 ```
 
-The Auth hook fires before a user JWT exists, so the Edge Function cannot require
-Supabase JWT auth.
+The Auth hook fires before a user JWT exists.
+The Edge Function cannot require Supabase JWT auth.
 
 ## Verify the request
 
-Read the raw body first. Standard Webhooks signs the exact bytes Supabase sends,
-so `JSON.parse` must happen after verification.
+Read the raw body first.
+Standard Webhooks signs the exact bytes Supabase sends.
+`JSON.parse` must happen after verification.
 
 ```ts
 import { Webhook } from "standardwebhooks";
@@ -97,13 +100,13 @@ async function verifyRequest(request: Request, secret: string) {
 }
 ```
 
-Return `401` when verification fails. A valid request continues to dispatch by
-`email_data.email_action_type`.
+Return `401` when verification fails.
+A valid request continues to dispatch by `email_data.email_action_type`.
 
 ## Build the verify link
 
-Use the Supabase Auth verify endpoint and `token_hash`, not the raw six-digit
-`token`:
+Use the Supabase Auth verify endpoint and `token_hash`.
+Do not use the raw six-digit `token`.
 
 ```ts
 function buildVerifyURL(emailData: EmailData) {
@@ -117,10 +120,11 @@ function buildVerifyURL(emailData: EmailData) {
 }
 ```
 
-`signup`, `invite`, `magiclink`, and `recovery` are link-first. `reauthentication`
-is OTP-only. `email_change` can be one email or two emails depending on the
-project's Secure Email Change setting; the example handles both documented
-token/hash pairs.
+`signup`, `invite`, `magiclink`, and `recovery` are link-first.
+`reauthentication` is OTP-only.
+`email_change` can be one email or two emails depending on the project's Secure
+Email Change setting.
+The example handles both documented token and hash pairs.
 
 ## Dispatch the core actions
 
@@ -172,26 +176,28 @@ async function sendAuthEmail(target: DeliveryTarget, rendered: RenderedEmail) {
 }
 ```
 
-The default branch is deliberate. Supabase has notification action types and a
-bare `email` OTP action; this recipe rejects them until you add explicit
-templates.
+The default branch is deliberate.
+Supabase has notification action types and a bare `email` OTP action.
+This recipe rejects them until you add explicit templates.
 
 ## Return the right status
 
-Supabase documents an empty `200` response as success:
+Supabase documents an empty `200` response as success.
 
 ```ts
 return new Response(null, { status: 200 });
 ```
 
-For bad signatures, return `401`. For Samva send failures or unsupported action
-types, return a non-200 response. Do not claim a special JSON error body unless
-your project has verified one against Supabase.
+For bad signatures, return `401`.
+For Samva send failures or unsupported action types, return a non-200 response.
+Do not claim a special JSON error body unless your project has verified one
+against Supabase.
 
 ## Templating
 
-Keep the hook minimal: render a React Email component to HTML and derive the text
-fallback with `toPlainText`.
+Keep the hook minimal.
+Render a React Email component to HTML.
+Derive the text fallback with `toPlainText`.
 
 ```tsx
 import { render, toPlainText } from "react-email";
@@ -201,8 +207,8 @@ const text = toPlainText(html);
 ```
 
 For richer templates, previews, Tailwind, and shared components, use the
-[React Email cookbook](./react-email.md). This Supabase recipe only owns the
-hook seam and the action dispatch.
+[React Email cookbook](./react-email.md).
+This Supabase recipe only owns the hook seam and the action dispatch.
 
 ## Choosing the auth guide
 

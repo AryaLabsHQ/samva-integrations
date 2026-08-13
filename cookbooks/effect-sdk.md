@@ -1,27 +1,30 @@
 # Effect SDK with Samva
 
 Use the `samva/effect` entrypoint when your app already runs on
-[Effect](https://effect.website). It gives you an Effect-native Samva client:
-semantic tagged errors, default-on retry with idempotent sends, and
+[Effect](https://effect.website).
+It gives you an Effect-native Samva client.
+You get semantic tagged errors, default-on retry with idempotent sends, and
 `Layer`-provided dependencies over the fetch HTTP client.
 
-If you are not using Effect, use the plain `samva` client instead. The payload is
-the same; this cookbook focuses on the Effect runtime shape.
+If you are not using Effect, use the plain `samva` client instead.
+The payload is the same. This cookbook focuses on the Effect runtime shape.
 
 ## Setup
 
 ```sh
-bun add samva effect@4.0.0-beta.98
+bun add samva effect@4.0.0-beta.102
 ```
 
-Keep `SAMVA_API_KEY` server-side only. The Effect SDK currently imports
-`effect/unstable/http`, so pin an Effect 4 beta that matches the SDK peer
-dependency and expect namespace churn before Effect 4 is stable.
+Keep `SAMVA_API_KEY` server-side only.
+The Effect SDK currently imports `effect/unstable/http`.
+Pin an Effect 4 beta that matches the SDK peer dependency.
+Expect namespace churn before Effect 4 is stable.
 
 ## First send
 
-`createClient` yields the Samva client inside an Effect program. Provide
-`FetchHttpClient.layer` once so the generated client can use `globalThis.fetch`.
+`createClient` yields the Samva client inside an Effect program.
+Provide `FetchHttpClient.layer` once so the generated client can use
+`globalThis.fetch`.
 
 ```ts
 import { Effect } from "effect";
@@ -43,13 +46,12 @@ const message = await Effect.runPromise(program);
 console.log(message.id, message.status);
 ```
 
-There is no `from` field. Samva sends from the verified sender configured on
-your account.
+There is no `from` field. Samva sends from the verified sender on your account.
 
 ## Layer-provided client
 
-For an application, provide `SamvaClient.layerFetch(config)` at the boundary and
-`yield* SamvaClient` anywhere inside the program.
+For an application, provide `SamvaClient.layerFetch(config)` at the boundary.
+Then `yield* SamvaClient` anywhere inside the program.
 
 ```ts
 import { Effect } from "effect";
@@ -79,10 +81,11 @@ Use `SamvaClient.layer(config)` instead when you want to provide your own
 
 ## Typed errors
 
-The client is derived from the same API contract the Samva API serves, so
-every operation fails with the server's own semantic tagged errors —
-`RateLimitedError`, `ValidationError`, `UnauthorizedError`, and so on — directly
-in the Effect error channel. Match them by tag and read each error's own fields.
+The client is derived from the same API contract the Samva API serves.
+Every operation fails with the server's own semantic tagged errors, such as
+`RateLimitedError`, `ValidationError`, and `UnauthorizedError`.
+Those errors land directly in the Effect error channel.
+Match them by tag and read each error's own fields.
 There is no per-status wrapper and no `cause` to unwrap.
 
 ```ts
@@ -106,15 +109,16 @@ const handled = sendWelcome("ada@example.com").pipe(
 );
 ```
 
-`retryAfterSeconds` is always a finite number, and `ValidationError.fields` is a
-`Record<string, string[]>` keyed by field name.
+`retryAfterSeconds` is always a finite number.
+`ValidationError.fields` is a `Record<string, string[]>` keyed by field name.
 
-Rather than enumerate tags, you can handle a whole category at once. The SDK
-exports `catchAuthError`, `catchValidationError`, `catchNotFoundError`,
+You can also handle a whole category at once.
+The SDK exports `catchAuthError`, `catchValidationError`, `catchNotFoundError`,
 `catchConflictError`, `catchThrottlingError`, `catchBillingError`, and
-`catchTransient`, plus the matching `isAuthError` / `isRetryable` / `isTransient`
-predicates. `catchAuthError` covers both `UnauthorizedError` and
-`ForbiddenError`:
+`catchTransient`.
+It also exports matching `isAuthError`, `isRetryable`, and `isTransient`
+predicates.
+`catchAuthError` covers both `UnauthorizedError` and `ForbiddenError`.
 
 ```ts
 import { Effect } from "effect";
@@ -129,8 +133,8 @@ const handledByCategory = sendWelcome("ada@example.com").pipe(
 );
 ```
 
-Timestamps decode to real `Date` values, so `message.createdAt` is a `Date` — no
-string parsing:
+Timestamps decode to real `Date` values. `message.createdAt` is a `Date`.
+You do not parse a string.
 
 ```ts
 const message = await Effect.runPromise(
@@ -141,16 +145,18 @@ console.log(message.createdAt.toISOString());
 
 ## Default-on retry
 
-Retry-safe operations retry on their own, so you do not wrap calls in
-`Effect.retry`. Reads and sends retry on throttling (`429`), transient server
-errors, and request-transport failures with jittered exponential backoff bounded
-to four attempts; a `429` waits for the server's `retryAfterSeconds` hint (capped
-at 60s). Keyless mutating calls are never auto-retried.
+Retry-safe operations retry on their own.
+Do not wrap calls in `Effect.retry`.
+Reads and sends retry on throttling `429`, transient server errors, and
+request-transport failures.
+Backoff is jittered exponential and bounded to four attempts.
+A `429` waits for the server's `retryAfterSeconds` hint, capped at 60s.
+Keyless mutating calls are never auto-retried.
 
 Because retry is built in, a `RateLimitedError` or `InternalError` that reaches
 your handler means retrying already failed to recover.
 
-Override or disable the policy with the `SamvaRetry` Layer:
+Override or disable the policy with the `SamvaRetry` Layer.
 
 ```ts
 import { Effect } from "effect";
@@ -167,11 +173,12 @@ sendWelcome("ada@example.com").pipe(
 
 ## Idempotency keys
 
-Every `email.send` / `messages.send` generates an `Idempotency-Key` per call,
-stable across the built-in retries, so a retried send never delivers twice. Pass
-your own key to deduplicate a send you might replay from another process. Reusing
-a key with identical content replays the original response; reusing it with
-different content fails with `ConflictError`.
+Every `email.send` and `messages.send` generates an `Idempotency-Key` per call.
+That key is stable across the built-in retries.
+A retried send never delivers twice.
+Pass your own key to deduplicate a send you might replay from another process.
+Reusing a key with identical content replays the original response.
+Reusing it with different content fails with `ConflictError`.
 
 ```ts
 samva.email.send(input, { idempotencyKey: "order-4417-receipt" });
@@ -179,8 +186,9 @@ samva.email.send(input, { idempotencyKey: "order-4417-receipt" });
 
 ## React Email
 
-Samva accepts rendered `html` and optional `text`. React Email stays in your app:
-render the component, derive text, and pass the strings to `email.send`.
+Samva accepts rendered `html` and optional `text`.
+React Email stays in your app.
+Render the component. Derive text. Pass the strings to `email.send`.
 
 ```tsx
 import { render, toPlainText } from "react-email";
@@ -202,10 +210,11 @@ plain-text fallbacks, and edge rendering.
 
 ## Edge and Workers
 
-`FetchHttpClient.layer` runs through the platform `globalThis.fetch`, so the
-same client shape works in Bun, Node with fetch, Vercel Edge, and Cloudflare
-Workers. For Workers, pass the key from the Worker environment and build the
-layer at the request or module boundary:
+`FetchHttpClient.layer` runs through the platform `globalThis.fetch`.
+The same client shape works in Bun, Node with fetch, Vercel Edge, and Cloudflare
+Workers.
+For Workers, pass the key from the Worker environment.
+Build the layer at the request or module boundary.
 
 ```ts
 import { Effect } from "effect";
@@ -233,25 +242,26 @@ export default {
 
 The [`examples/effect-sdk`](../examples/effect-sdk) app includes:
 
-- `src/send.ts` - a first-send script with `createClient`.
-- `src/server.ts` - a fetch handler with `SamvaClient.layerFetch`, semantic
-  tagged errors and `catchAuthError` mapped to HTTP responses, and `isRetryable`
-  splitting exhausted-retry failures from unexpected ones.
-- loud `SAMVA_API_KEY` validation.
-- escaping for user text before it is placed into HTML.
+- `src/send.ts` is a first-send script with `createClient`.
+- `src/server.ts` is a fetch handler with `SamvaClient.layerFetch`.
+  It maps semantic tagged errors and `catchAuthError` to HTTP responses.
+  It uses `isRetryable` to split exhausted-retry failures from unexpected ones.
+- Loud `SAMVA_API_KEY` validation.
+- Escaping for user text before it is placed into HTML.
 
 ## FAQ
 
-**Why is there no `from`?** Samva sends from the verified sender configured on
-your account. Configure senders at [samva.app](https://samva.app).
+**Why is there no `from`?** Samva sends from the verified sender on your
+account. Configure senders at [samva.app](https://samva.app).
 
 **Where should the API key live?** Only on the server or in an edge environment
 binding. Do not expose it to browser code.
 
-**Do I need to add my own retries?** No. Reads and sends retry on throttling and
-transient failures out of the box, and sends stay safe under retry because they
-carry an `Idempotency-Key`. Wrapping a call in `Effect.retry` nests your policy
-on top of the built-in one; use `SamvaRetry.layer` to change it instead.
+**Do I need to add my own retries?** No.
+Reads and sends retry on throttling and transient failures out of the box.
+Sends stay safe under retry because they carry an `Idempotency-Key`.
+Wrapping a call in `Effect.retry` nests your policy on top of the built-in one.
+Use `SamvaRetry.layer` to change it instead.
 
 **Can I receive webhooks here too?** Receiving and verifying Samva webhooks is a
 separate concern. Use the `samva/webhooks` SDK export or the webhook cookbook

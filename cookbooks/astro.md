@@ -1,18 +1,22 @@
 # Astro with Samva
 
 Use Astro to collect email input and send it with the `samva` SDK from server
-code. The primary path is an [Astro Action](https://docs.astro.build/en/guides/actions/)
-for progressively enhanced forms. A plain API endpoint is the right alternative
-for headless JSON clients.
+code.
+The primary path is an [Astro Action](https://docs.astro.build/en/guides/actions/)
+for progressively enhanced forms.
+A plain API endpoint is the right alternative for headless JSON clients.
 
-Samva sends from the verified sender configured on your account, so there is no
-`from` field in the payload. The SDK is `fetch`-based, which means the same send
-code runs under `@astrojs/cloudflare`, `@astrojs/node`, and other SSR adapters.
+Samva sends from the verified sender on your account.
+There is no `from` field in the payload.
+The SDK is `fetch`-based.
+The same send code runs under `@astrojs/cloudflare`, `@astrojs/node`, and other
+SSR adapters.
 
 ## Setup
 
-Install the SDK and add an SSR adapter. The Cloudflare adapter proves the edge
-runtime path; use `@astrojs/node` if you want the simplest Node server.
+Install the SDK and add an SSR adapter.
+The Cloudflare adapter proves the edge runtime path.
+Use `@astrojs/node` if you want the simplest Node server.
 
 ```sh
 bun add samva
@@ -46,18 +50,20 @@ import { createClient } from "samva";
 export const samva = createClient({ apiKey: SAMVA_API_KEY });
 ```
 
-Astro does not have a `server-only` import guard like Next.js. Keep this module
-off client islands and import it only from Actions, API endpoints, middleware,
-or `.astro` frontmatter that runs on the server.
+Astro does not have a `server-only` import guard like Next.js.
+Keep this module off client islands.
+Import it only from Actions, API endpoints, middleware, or `.astro` frontmatter
+that runs on the server.
 
 For a smaller setup, you can read `import.meta.env.SAMVA_API_KEY` from server
-code instead. Do not use a `PUBLIC_` prefix for API keys; public variables are
-client-exposed.
+code instead.
+Do not use a `PUBLIC_` prefix for API keys.
+Public variables are client-exposed.
 
 ## Send from an Astro Action
 
-Actions are the best default for contact forms and app forms because Astro owns
-validation, progressive enhancement, and the post-submit result.
+Actions are the best default for contact forms and app forms.
+Astro owns validation, progressive enhancement, and the post-submit result.
 
 ```ts
 // src/actions/index.ts
@@ -128,8 +134,10 @@ const result = Astro.getActionResult(actions.send);
 {result?.error && <p>{result.error.message}</p>}
 ```
 
-Client islands can call the same action with `await actions.send(input)`, and
-server code can use `Astro.callAction(actions.send, input)`.
+`result.data` and `result.error` here are Astro Action result fields.
+They are not the Samva Promise client envelope.
+Client islands can call the same action with `await actions.send(input)`.
+Server code can use `Astro.callAction(actions.send, input)`.
 
 ## Send from an API endpoint
 
@@ -203,13 +211,14 @@ export const POST: APIRoute = async ({ request }) => {
 ```
 
 `prerender = false` keeps this route on demand if the rest of your site is
-static. If you set `output: "server"` globally, all routes are server-rendered by
+static.
+If you set `output: "server"` globally, all routes are server-rendered by
 default.
 
 ## Edge and Workers
 
-Samva uses `fetch`, not SMTP or Node-only modules, so the same send call works in
-Cloudflare Workers through `@astrojs/cloudflare`.
+Samva uses `fetch`, not SMTP or Node-only modules.
+The same send call works in Cloudflare Workers through `@astrojs/cloudflare`.
 
 ```js
 import cloudflare from "@astrojs/cloudflare";
@@ -233,7 +242,7 @@ The Samva code does not change.
 ## Render React Email in Astro
 
 For component-based templates, render React Email to HTML and pass the string to
-Samva:
+Samva.
 
 ```tsx
 import { render } from "@react-email/render";
@@ -248,15 +257,18 @@ await samva.messages.send({
 });
 ```
 
-Import from the bare `@react-email/render` package. Its exports map selects the
-Workers-safe build under `workerd` / edge conditions; there is no `/edge`
-subpath to import. See the [React Email cookbook](./react-email.md) for
-Tailwind, preview, export, and plain-text fallback patterns.
+Import from the bare `@react-email/render` package.
+Its exports map selects the Workers-safe build under `workerd` and edge
+conditions.
+There is no `/edge` subpath to import.
+See the [React Email cookbook](./react-email.md) for Tailwind, preview, export,
+and plain-text fallback patterns.
 
 ## Receive Samva webhooks
 
-An Astro webhook receiver is an API endpoint. Read the raw body before parsing
-so the same bytes can be verified by a real signature verifier.
+An Astro webhook receiver is an API endpoint.
+Read the raw body before parsing so the same bytes can be verified by a real
+signature verifier.
 
 ```ts
 // src/pages/api/webhooks/samva.ts
@@ -302,30 +314,36 @@ export const POST: APIRoute = async ({ request }) => {
 };
 ```
 
-This is only the route shape. Do not hand-roll a signature algorithm or ship an
-"always passing" verifier. Use `samva/webhooks` for production verification.
+This is only the route shape.
+Do not hand-roll a signature algorithm or ship an always-passing verifier.
+Use `samva/webhooks` for production verification.
 
 ## FAQ
 
 **Action or endpoint?** Use Actions for Astro-owned forms and endpoints for JSON
-clients. Actions are still public endpoints, so do the same auth, rate-limit, and
-abuse checks you would do in an API route.
+clients.
+Actions are still public endpoints.
+Do the same auth, rate-limit, and abuse checks you would do in an API route.
 
-**Can I send from a prerendered route?** No. Email is runtime work. Use
-`output: "server"` or `export const prerender = false`.
+**Can I send from a prerendered route?** No.
+Email is runtime work.
+Use `output: "server"` or `export const prerender = false`.
 
-**Do I need an adapter?** Yes for runtime sends in production. Use
-`@astrojs/cloudflare` for Workers or `@astrojs/node` for a Node server.
+**Do I need an adapter?** Yes for runtime sends in production.
+Use `@astrojs/cloudflare` for Workers or `@astrojs/node` for a Node server.
 
-**Where does the API key live?** Server-only env. Prefer `astro:env/server` with
-an `envField.string({ context: "server", access: "secret" })` schema. Never use
-`PUBLIC_SAMVA_API_KEY`.
+**Where does the API key live?** Server-only env.
+Prefer `astro:env/server` with an
+`envField.string({ context: "server", access: "secret" })` schema.
+Never use `PUBLIC_SAMVA_API_KEY`.
 
-**Why no `from`?** Samva sends from the verified sender configured on your
-account at [samva.app](https://samva.app).
+**Why no `from`?** Samva sends from the verified sender on your account at
+[samva.app](https://samva.app).
 
-**Can this run on Cloudflare Workers?** Yes. The SDK is `fetch`-based, and React
-Email rendering works from the bare `@react-email/render` import under Workers.
+**Can this run on Cloudflare Workers?** Yes.
+The SDK is `fetch`-based.
+React Email rendering works from the bare `@react-email/render` import under
+Workers.
 
 ## Example
 
