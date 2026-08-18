@@ -187,7 +187,7 @@
       "peerDependencies": {
         "@react-email/render": "^2.0.0",
         "better-auth": "^1.7.0-beta.9",
-        "samva": "^0.1.0",
+        "samva": "^0.2.0",
       },
       "optionalPeers": [
         "@react-email/render",
