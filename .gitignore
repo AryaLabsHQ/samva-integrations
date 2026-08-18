@@ -10,3 +10,4 @@ examples/*/build
 .env
 .env.*
 !.env.example
+.claude/workflows
