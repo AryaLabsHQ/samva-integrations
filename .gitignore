@@ -11,3 +11,4 @@ examples/*/build
 .env.*
 !.env.example
 .claude/workflows
+pkg.tgz
