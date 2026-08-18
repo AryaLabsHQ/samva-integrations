@@ -59,6 +59,11 @@ sends.
 - Keep changes scoped; run `build`, `typecheck`, `test`, `lint`, and
   `format:check` before opening a PR.
 
+User-visible package changes also need a pending Tegami changelog under
+`.tegami/`. See [the release guide](./docs/releases.md) for the file format and
+package names. Commit the changelog with the implementation it describes; do
+not edit package `CHANGELOG.md` files or `.tegami/publish-lock.yaml` directly.
+
 ## Proposing a new integration
 
 Open an integration request issue first so we can align on scope, package shape,

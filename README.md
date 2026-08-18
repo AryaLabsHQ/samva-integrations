@@ -83,7 +83,9 @@ bun run format:check
 ## Contributing
 
 Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for local
-setup, package conventions, and how to propose a new integration.
+setup, package conventions, and how to propose a new integration. Maintainers
+use the attended [Tegami release flow](./docs/releases.md) for package versions,
+changelogs, npm publication, tags, and GitHub Releases.
 
 ## Security
 
