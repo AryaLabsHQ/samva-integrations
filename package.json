@@ -30,7 +30,7 @@
     "@typescript/native-preview": "^7.0.0-dev.20260624.1",
     "oxfmt": "^0.54.0",
     "oxlint": "^1.69.0",
-    "samva": "link:samva",
+    "samva": "^0.2.0",
     "tsdown": "^0.16.7",
     "turbo": "^2.9.18",
     "vitest": "^4.1.8"
