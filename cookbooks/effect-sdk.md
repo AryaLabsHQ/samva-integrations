@@ -122,14 +122,14 @@ const handledByCategory = sendWelcome("ada@example.com").pipe(
 );
 ```
 
-Timestamps decode to real `Date` values. `message.createdAt` is a `Date`.
-You do not parse a string.
+Timestamps use ISO 8601 strings. `message.createdAt` can be returned directly or
+parsed into a `Date` when your application needs date operations.
 
 ```ts
 const message = await Effect.runPromise(
   sendWelcome("ada@example.com").pipe(Effect.provide(SamvaLayer)),
 );
-console.log(message.createdAt.toISOString());
+console.log(message.createdAt);
 ```
 
 ## Default-on retry
@@ -155,9 +155,7 @@ import { Retry, isRetryable } from "samva/effect";
 sendWelcome("ada@example.com").pipe(Effect.provide(Retry.layerDisabled));
 
 // Or a custom policy, using any Effect.retry options:
-sendWelcome("ada@example.com").pipe(
-  Effect.provide(Retry.layer({ times: 6, while: isRetryable })),
-);
+sendWelcome("ada@example.com").pipe(Effect.provide(Retry.layer({ times: 6, while: isRetryable })));
 ```
 
 ## Idempotency keys

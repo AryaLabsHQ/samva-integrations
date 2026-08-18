@@ -12,9 +12,9 @@ templates, handle delivery events, and verify signed webhooks.
 - `examples/*` — complete, runnable example apps.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
 
-The maintained integrations target the public Samva 0.2 email SDK. Workspace
-examples use a local `link:samva` dependency for development; copyable external
-import maps pin `samva@0.2.0`.
+The maintained integrations target the published Samva 0.2 email SDK. Workspace
+packages and examples use `samva@^0.2.0`; copyable external import maps pin
+`samva@0.2.0`.
 
 ## Package integrations
 
