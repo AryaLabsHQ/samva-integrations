@@ -22,6 +22,13 @@ async function auditPackage(packageRoot: (typeof packageRoots)[number]) {
   assert(typeof packageName === "string", `${manifestPath} must declare a package name`);
   assert(manifest.private !== true, `${packageName} must not be private`);
 
+  const build = Bun.spawn(["bun", "run", "build"], {
+    cwd: packageRoot,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  assert((await build.exited) === 0, `${packageName} build failed`);
+
   const publishConfig = manifest.publishConfig as { readonly access?: unknown } | undefined;
   assert(publishConfig?.access === "public", `${packageName} must publish with public access`);
 

@@ -49,6 +49,18 @@ const paper = tegami({
     client: "bun",
     updateLockFile: true,
     onBreakPeerDep: "error",
+    bumpDep: ({ dependent, kind }) => {
+      if (dependent.manifest.private === true) return false;
+      switch (kind) {
+        case "dependencies":
+        case "optionalDependencies":
+          return "patch";
+        case "peerDependencies":
+          return "major";
+        case "devDependencies":
+          return false;
+      }
+    },
   },
   groups: {
     "better-auth": { syncBump: true, syncGitTag: true },
