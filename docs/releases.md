@@ -36,13 +36,14 @@ Start from a clean, current `main` with GitHub CLI authentication:
 
 ```sh
 bun install --frozen-lockfile
-GH_TOKEN="$(gh auth token)" bun run version:packages
+bun run version:packages
 ```
 
-Tegami consumes pending changelogs, updates package versions and changelogs,
-refreshes `bun.lock`, writes `.tegami/publish-lock.yaml`, pushes
-`tegami/version-packages`, and opens or updates a pull request against `main`.
-Review and merge that pull request before publishing.
+The version command passes the authenticated `gh` token to Tegami. Tegami
+consumes pending changelogs, updates package versions and changelogs, refreshes
+`bun.lock`, writes `.tegami/publish-lock.yaml`, pushes `tegami/version-packages`,
+and opens or updates a pull request against `main`. Review and merge that pull
+request before publishing.
 
 ## Publish
 
@@ -51,12 +52,13 @@ release:
 
 ```sh
 npm whoami
-GH_TOKEN="$(gh auth token)" bun run release
+gh auth status
+bun run release
 ```
 
-The release command runs the full repository gates, audits each canonical npm
-tarball, lets Tegami publish planned packages, then pushes group tags and creates
-matching GitHub Releases.
+The release command runs the full repository gates, passes the authenticated
+`gh` token to Tegami, audits each canonical npm tarball, publishes planned
+packages, then pushes group tags and creates matching GitHub Releases.
 
 Verify the result for each affected package:
 
