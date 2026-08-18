@@ -20,6 +20,8 @@ packages and examples use `samva@^0.2.0`; copyable external import maps pin
 
 - [`@samva/better-auth`](./packages/better-auth) — Better Auth email callbacks
   powered by Samva.
+- [`@samva/email-sdk`](./packages/email-sdk) — Provider-owned Samva community
+  adapter for Email SDK.
 
 ## Cookbooks
 
@@ -28,6 +30,7 @@ packages and examples use `samva@^0.2.0`; copyable external import maps pin
 - [`Better Auth`](./cookbooks/better-auth.md)
 - [`Clerk`](./cookbooks/clerk.md)
 - [`Effect SDK`](./cookbooks/effect-sdk.md)
+- [`Email SDK`](./cookbooks/email-sdk.md)
 - [`Hono on Cloudflare Workers`](./cookbooks/hono-cloudflare-workers.md)
 - [`Next.js`](./cookbooks/nextjs.md)
 - [`Prisma`](./cookbooks/prisma.md)

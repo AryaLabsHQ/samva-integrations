@@ -2,8 +2,23 @@
   "name": "@samva/email-sdk",
   "version": "0.1.0",
   "description": "Samva community adapter for Email SDK.",
+  "keywords": [
+    "email",
+    "email-sdk",
+    "samva",
+    "transactional-email"
+  ],
+  "homepage": "https://samva.dev",
+  "bugs": {
+    "url": "https://github.com/AryaLabsHQ/samva-integrations/issues"
+  },
   "license": "MIT",
   "author": "Arya Labs, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AryaLabsHQ/samva-integrations.git",
+    "directory": "packages/email-sdk"
+  },
   "files": [
     "dist",
     "README.md",
