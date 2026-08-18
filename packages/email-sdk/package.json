@@ -1,0 +1,55 @@
+{
+  "name": "@samva/email-sdk",
+  "version": "0.1.0",
+  "description": "Samva community adapter for Email SDK.",
+  "keywords": [
+    "email",
+    "email-sdk",
+    "samva",
+    "transactional-email"
+  ],
+  "homepage": "https://samva.dev",
+  "bugs": {
+    "url": "https://github.com/AryaLabsHQ/samva-integrations/issues"
+  },
+  "license": "MIT",
+  "author": "Arya Labs, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AryaLabsHQ/samva-integrations.git",
+    "directory": "packages/email-sdk"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown src/index.ts --format esm --dts --external samva --external @opencoredev/email-sdk",
+    "dev": "tsdown src/index.ts --format esm --dts --watch --external samva --external @opencoredev/email-sdk",
+    "typecheck": "tsgo --noEmit",
+    "test": "vitest run --config vitest.config.ts"
+  },
+  "devDependencies": {
+    "@opencoredev/email-sdk": "^1.1.0",
+    "samva": "^0.2.0"
+  },
+  "peerDependencies": {
+    "@opencoredev/email-sdk": "^1.1.0",
+    "samva": "^0.2.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
