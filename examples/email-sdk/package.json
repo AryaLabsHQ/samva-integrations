@@ -1,0 +1,20 @@
+{
+  "name": "@samva-examples/email-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Send email through Email SDK with the Samva community adapter.",
+  "type": "module",
+  "scripts": {
+    "build": "bun build src/send.ts --outdir dist --target bun",
+    "send": "bun run src/send.ts",
+    "typecheck": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "@opencoredev/email-sdk": "^1.1.0",
+    "@samva/email-sdk": "workspace:*",
+    "samva": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14"
+  }
+}

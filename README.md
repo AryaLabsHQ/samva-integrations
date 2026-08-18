@@ -52,6 +52,8 @@ Integrations land as individual pull requests. See
   transactional email in Next.js.
 - [`effect-sdk`](./examples/effect-sdk) — Email sends through the `samva/effect`
   SDK entrypoint.
+- [`email-sdk`](./examples/email-sdk) — Email SDK sends through the provider-owned
+  Samva community adapter.
 - [`hono-cloudflare-workers`](./examples/hono-cloudflare-workers) — Hono Worker
   with a JSON email endpoint.
 - [`nextjs-transactional`](./examples/nextjs-transactional) — App Router

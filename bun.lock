@@ -80,6 +80,18 @@
         "@types/bun": "^1.3.14",
       },
     },
+    "examples/email-sdk": {
+      "name": "@samva-examples/email-sdk",
+      "version": "0.0.0",
+      "dependencies": {
+        "@opencoredev/email-sdk": "^1.1.0",
+        "@samva/email-sdk": "workspace:*",
+        "samva": "^0.2.0",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+      },
+    },
     "examples/hono-cloudflare-workers": {
       "name": "hono-cloudflare-workers-samva",
       "version": "0.0.0",
@@ -765,6 +777,8 @@
     "@rollup/rollup-win32-x64-gnu": ["@rollup/rollup-win32-x64-gnu@4.62.4", "", { "os": "win32", "cpu": "x64" }, "sha512-qPzHqdj9rfUD+w79dtE07zi/kFwKyCJqplp5K5ygeLTp7jLpAoc16OAH39HSmRC9UpozaecsleI8uAdEj6v2yw=="],
 
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.62.4", "", { "os": "win32", "cpu": "x64" }, "sha512-zD6NdeWEByGE9QF9vCrlJ5YQB4oq9q91kPZS37Jwj5hOkvR1lTBSpsKhKDw4IJtbQ35LsTS1HD9DZYGKIshU1Q=="],
+
+    "@samva-examples/email-sdk": ["@samva-examples/email-sdk@workspace:examples/email-sdk"],
 
     "@samva/better-auth": ["@samva/better-auth@workspace:packages/better-auth"],
 
