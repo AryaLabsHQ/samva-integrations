@@ -1,8 +1,6 @@
 import type { Client } from "samva/effect";
 
-export function readSamvaConfig(
-  env: Record<string, string | undefined> = Bun.env,
-): Client.Config {
+export function readSamvaConfig(env: Record<string, string | undefined> = Bun.env): Client.Config {
   const apiKey = env.SAMVA_API_KEY?.trim();
 
   if (!apiKey) {

@@ -107,7 +107,7 @@ export function createFetchHandler(config: Client.Config): {
           jsonResponse({
             id: message.id,
             status: message.status,
-            createdAt: message.createdAt.toISOString(),
+            createdAt: message.createdAt,
           }),
         ),
         Effect.catchTags({
