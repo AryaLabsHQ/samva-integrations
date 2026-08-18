@@ -1,0 +1,49 @@
+core:changelogs:
+  - content: "---\npackages:\n  \"@samva/email-sdk\":\n    type: minor\n---\n\n## Initial Email SDK adapter\n\nPublish the first public release of the Samva community adapter for Email SDK.\n"
+    filename: 2026-08-18-d4b8c2a6.md
+    v: 0.0.0
+  - content: "---\npackages:\n  \"@samva/better-auth\":\n    type: minor\n---\n\n## Initial Better Auth integration\n\nPublish the first public release of the Better Auth integration for sending authentication emails through Samva.\n"
+    filename: 2026-08-18-a7c3e9f1.md
+    v: 0.0.0
+core:packages:
+  - changelogIds:
+      - 2026-08-18-d4b8c2a6.md
+    id: npm:@samva/email-sdk
+    updated: true
+  - id: npm:better-auth-nextjs-samva
+    updated: false
+  - id: npm:hono-cloudflare-workers-samva
+    updated: false
+  - id: npm:nextjs-transactional-samva
+    updated: false
+  - id: npm:sveltekit-transactional-samva
+    updated: false
+  - id: npm:supabase-auth-hook-samva
+    updated: false
+  - id: npm:effect-sdk-example
+    updated: false
+  - id: npm:astro-email-samva
+    updated: false
+  - id: npm:clerk-webhook-samva
+    updated: false
+  - id: npm:react-email-samva
+    updated: false
+  - changelogIds:
+      - 2026-08-18-a7c3e9f1.md
+    id: npm:@samva/better-auth
+    updated: true
+  - id: npm:tanstack-start-transactional-samva
+    updated: false
+npm:packages:
+  - id: npm:@samva/email-sdk
+  - id: npm:better-auth-nextjs-samva
+  - id: npm:hono-cloudflare-workers-samva
+  - id: npm:nextjs-transactional-samva
+  - id: npm:sveltekit-transactional-samva
+  - id: npm:supabase-auth-hook-samva
+  - id: npm:effect-sdk-example
+  - id: npm:astro-email-samva
+  - id: npm:clerk-webhook-samva
+  - id: npm:react-email-samva
+  - id: npm:@samva/better-auth
+  - id: npm:tanstack-start-transactional-samva
