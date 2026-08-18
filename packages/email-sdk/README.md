@@ -5,9 +5,7 @@ Provider-owned Samva community adapter for
 and `samva@^0.2.0`.
 
 This adapter is maintained by Samva as a community integration; it is not an
-official built-in Email SDK adapter. Its current evidence is deterministic,
-no-network contract tests and packed-consumer validation. A live Samva account
-send has not yet been performed for this release.
+official built-in Email SDK adapter.
 
 ## Install
 
