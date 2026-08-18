@@ -174,6 +174,15 @@ describe("samva", () => {
 
   it.each([
     ["headers", { headers: [{ name: "X-Test", value: "yes" }] }],
+    [
+      "repeated headers",
+      {
+        headers: [
+          { name: "X-Test", value: "one" },
+          { name: "x-test", value: "two" },
+        ],
+      },
+    ],
     ["tags", { tags: [{ name: "kind", value: "welcome" }] }],
     ["sendAt", { sendAt: new Date("2026-08-18T00:00:00Z") }],
     ["path", { attachments: [{ filename: "x", path: "/tmp/x", contentType: "text/plain" }] }],
@@ -390,6 +399,36 @@ describe("samva", () => {
     expect((error as Error).cause).toBeUndefined();
     expect(String(error)).not.toContain("provider body");
   });
+
+  it.each([408, 409, 425] as const)(
+    "marks transport status %i as retryable with unknown delivery",
+    async (status) => {
+      const adapter = samva({
+        client: injectedClient(async () => {
+          throw {
+            _tag: "SamvaTransportError",
+            status,
+            response: new Response(null, {
+              status,
+              headers: { "x-request-id": `request_${status}` },
+            }),
+          };
+        }),
+      });
+
+      const error = await Promise.resolve(adapter.send(message, context)).catch(
+        (caught: unknown) => caught,
+      );
+      expect(error).toBeInstanceOf(EmailAdapterError);
+      expect(error).toMatchObject({
+        adapter: "samva",
+        status,
+        requestId: `request_${status}`,
+        retryable: true,
+        delivery: "unknown",
+      });
+    },
+  );
 
   it("classifies malformed success as unknown delivery", async () => {
     const adapter = samva({ client: injectedClient(async () => ({ status: "queued" })) });
