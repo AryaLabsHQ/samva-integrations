@@ -196,6 +196,18 @@
         "@react-email/render",
       ],
     },
+    "packages/email-sdk": {
+      "name": "@samva/email-sdk",
+      "version": "0.1.0",
+      "devDependencies": {
+        "@opencoredev/email-sdk": "^1.1.0",
+        "samva": "^0.2.0",
+      },
+      "peerDependencies": {
+        "@opencoredev/email-sdk": "^1.1.0",
+        "samva": "^0.2.0",
+      },
+    },
   },
   "packages": {
     "@astrojs/check": ["@astrojs/check@0.9.10", "", { "dependencies": { "@astrojs/language-server": "^2.16.7", "chokidar": "^4.0.3", "kleur": "^4.1.5", "yargs": "^18.0.0" }, "peerDependencies": { "typescript": "^5.0.0 || ^6.0.0" }, "bin": { "astro-check": "./bin/astro-check.js" } }, "sha512-zgx/UQMozdjOa3bOxjgeCFdtpE3c9rRX6xHwa+2QXvy8z8Akifu2AtubHyv/zzC2znO8dl8fFWL4K+Ba9kS8HQ=="],
@@ -524,6 +536,8 @@
 
     "@oozcitak/util": ["@oozcitak/util@10.0.0", "", {}, "sha512-hAX0pT/73190NLqBPPWSdBVGtbY6VOhWYK3qqHqtXQ1gK7kS2yz4+ivsN07hpJ6I3aeMtKP6J6npsEKOAzuTLA=="],
 
+    "@opencoredev/email-sdk": ["@opencoredev/email-sdk@1.1.0", "", { "peerDependencies": { "@react-email/render": "^2.1.0", "ai": "^6.0.182 || ^7.0.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@react-email/render", "ai", "react", "react-dom"], "bin": { "email-sdk": "dist/cli.js" } }, "sha512-YZ33+pnhLQaiNXUmdrmSA11Rti2fmE1oDugH8tNdsigDcR5KNGTjJxpr4NZgZI0nRzBTPVVyFabsX7Q3hiwv1A=="],
+
     "@opentelemetry/semantic-conventions": ["@opentelemetry/semantic-conventions@1.43.0", "", {}, "sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg=="],
 
     "@oslojs/encoding": ["@oslojs/encoding@1.1.0", "", {}, "sha512-70wQhgYmndg4GCPxPPxPGevRKqTIJ2Nh4OkiMWmDAVYsTQ+Ta7Sq+rPevXyXGdzr30/qZBnyOalCszoMxlyldQ=="],
@@ -753,6 +767,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.62.4", "", { "os": "win32", "cpu": "x64" }, "sha512-zD6NdeWEByGE9QF9vCrlJ5YQB4oq9q91kPZS37Jwj5hOkvR1lTBSpsKhKDw4IJtbQ35LsTS1HD9DZYGKIshU1Q=="],
 
     "@samva/better-auth": ["@samva/better-auth@workspace:packages/better-auth"],
+
+    "@samva/email-sdk": ["@samva/email-sdk@workspace:packages/email-sdk"],
 
     "@samva/webhooks": ["@samva/webhooks@0.2.0", "", { "peerDependencies": { "effect": "4.0.0-beta.102" }, "optionalPeers": ["effect"] }, "sha512-7le+zjliNYXF9amJt3xL6ZaIswHtGYGe9ZIB5a7p6nPEU+t7ZhiwdT3YKalbXFf5HLcvqnXwGBJoTx1VhP+Grw=="],
 
