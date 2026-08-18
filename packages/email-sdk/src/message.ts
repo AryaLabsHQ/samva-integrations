@@ -118,7 +118,7 @@ function attachmentBytes(attachment: EmailAttachment): Promise<Uint8Array> | Uin
   throw validationError(`attachment "${attachment.filename}"`, "content is malformed");
 }
 
-function validateAttachment(attachment: EmailAttachment): void {
+function validateAttachment(attachment: EmailAttachment): string {
   const field = `attachment "${attachment.filename}"`;
   if (!attachment.filename || attachment.filename.trim() !== attachment.filename) {
     throw validationError(field, "filename is empty or has surrounding whitespace");
@@ -142,15 +142,16 @@ function validateAttachment(attachment: EmailAttachment): void {
   if (attachment.content === undefined) {
     throw validationError(field, "in-memory content is required");
   }
+  return attachment.contentType;
 }
 
 async function normalizeAttachment(attachment: EmailAttachment) {
-  validateAttachment(attachment);
+  const contentType = validateAttachment(attachment);
   const bytes = await attachmentBytes(attachment);
   return {
     filename: attachment.filename,
     content: bytesToBase64(bytes),
-    contentType: attachment.contentType!,
+    contentType,
     size: bytes.byteLength,
   };
 }
