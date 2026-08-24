@@ -1,0 +1,97 @@
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
+
+import { afterEach, describe, expect, it } from "vitest";
+
+import { validateAgentPlugin } from "../../../scripts/validate-agent-plugin.mts";
+
+const repositoryRoot = resolve(import.meta.dirname, "../../..");
+const temporaryRoots: Array<string> = [];
+
+const fixture = async (): Promise<string> => {
+  const root = await mkdtemp(resolve(tmpdir(), "samva-agent-plugin-"));
+  temporaryRoots.push(root);
+  await cp(resolve(repositoryRoot, "plugins"), resolve(root, "plugins"), { recursive: true });
+  await cp(resolve(repositoryRoot, ".cursor-plugin"), resolve(root, ".cursor-plugin"), {
+    recursive: true,
+  });
+  return root;
+};
+
+const editJson = async (
+  root: string,
+  path: string,
+  edit: (value: Record<string, any>) => void,
+): Promise<void> => {
+  const absolutePath = resolve(root, path);
+  const value = JSON.parse(await readFile(absolutePath, "utf8")) as Record<string, any>;
+  edit(value);
+  await writeFile(absolutePath, `${JSON.stringify(value, null, 2)}\n`);
+};
+
+afterEach(async () => {
+  await Promise.all(
+    temporaryRoots.splice(0).map((root) => rm(root, { recursive: true, force: true })),
+  );
+});
+
+describe("Samva agent plugin contract", () => {
+  it("accepts the canonical distributable bundle", async () => {
+    await expect(validateAgentPlugin(repositoryRoot)).resolves.toEqual([]);
+  });
+
+  it("rejects a non-canonical endpoint", async () => {
+    const root = await fixture();
+    await editJson(root, "plugins/samva/mcp.json", (value) => {
+      value.mcpServers.samva.url = "https://example.com/mcp";
+    });
+    expect(await validateAgentPlugin(root)).toContain(
+      "Cursor MCP config must use the canonical HTTP endpoint https://mcp.samva.dev",
+    );
+  });
+
+  it("rejects credentials in MCP configuration", async () => {
+    const root = await fixture();
+    await editJson(root, "plugins/samva/.mcp.json", (value) => {
+      value.mcpServers.samva.headers = { Authorization: "Bearer secret" };
+    });
+    expect(await validateAgentPlugin(root)).toContain(
+      "Codex MCP config contains unsupported or credential-bearing keys: headers",
+    );
+  });
+
+  it("rejects a missing canonical reference", async () => {
+    const root = await fixture();
+    await rm(resolve(root, "plugins/samva/skills/samva/references/auth.md"));
+    expect(await validateAgentPlugin(root)).toContain("Missing canonical skill reference: auth.md");
+  });
+
+  it("rejects a path that escapes the plugin root", async () => {
+    const root = await fixture();
+    await editJson(root, "plugins/samva/.cursor-plugin/plugin.json", (value) => {
+      value.skills = "./../skills";
+    });
+    expect(await validateAgentPlugin(root)).toContain(
+      "Cursor manifest skills escapes the plugin root",
+    );
+  });
+
+  it("rejects changed skill content with stale provenance", async () => {
+    const root = await fixture();
+    const path = resolve(root, "plugins/samva/skills/samva/references/sdk.md");
+    await writeFile(path, `${await readFile(path, "utf8")}\nChanged.\n`);
+    expect(await validateAgentPlugin(root)).toContain(
+      "Skill bundle digest does not match provenance",
+    );
+  });
+
+  it("rejects unsupported product and submission claims", async () => {
+    const root = await fixture();
+    const path = resolve(root, "plugins/samva/review/unsupported.md");
+    await writeFile(path, "This plugin supports SMS and was submitted to OpenAI.\n");
+    const errors = await validateAgentPlugin(root);
+    expect(errors).toContain("Unsupported product claim in review/unsupported.md");
+    expect(errors).toContain("Unsupported submission claim in review/unsupported.md");
+  });
+});

@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "samva": { "type": "http", "url": "https://mcp.samva.dev" }
+  }
+}

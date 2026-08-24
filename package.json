@@ -16,6 +16,7 @@
     "typecheck": "turbo run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
+    "validate:agent-plugin": "bun scripts/validate-agent-plugin.mts",
     "tegami": "bun scripts/tegami.mts",
     "version:packages": "GH_TOKEN=\"$(gh auth token)\" bun run tegami version",
     "release:packages:check": "bun run scripts/check-public-packages.mts",

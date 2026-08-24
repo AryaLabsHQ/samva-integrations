@@ -11,6 +11,7 @@ templates, handle delivery events, and verify signed webhooks.
 - `packages/*` — package integrations (`@samva/*`).
 - `examples/*` — complete, runnable example apps.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
+- `plugins/*` — coding-agent plugins and their review evidence.
 
 The maintained integrations target the published Samva 0.2 email SDK. Workspace
 packages and examples use `samva@^0.2.0`; copyable external import maps pin
@@ -22,6 +23,11 @@ packages and examples use `samva@^0.2.0`; copyable external import maps pin
   powered by Samva.
 - [`@samva/email-sdk`](./packages/email-sdk) — Provider-owned Samva community
   adapter for Email SDK.
+
+## Agent plugins
+
+- [`samva`](./plugins/samva) — OpenAI Codex and Cursor packaging for the
+  canonical hosted MCP server and Samva agent skill.
 
 ## Cookbooks
 

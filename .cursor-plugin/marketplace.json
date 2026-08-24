@@ -1,0 +1,13 @@
+{
+  "name": "samva-integrations",
+  "owner": { "name": "Arya Labs, Inc." },
+  "metadata": { "description": "Official Samva integrations for coding agents." },
+  "plugins": [
+    {
+      "name": "samva",
+      "source": "plugins/samva",
+      "description": "Operate Samva email through its hosted MCP server and canonical agent skill.",
+      "minClientVersions": { "cursor": "3.13.0" }
+    }
+  ]
+}

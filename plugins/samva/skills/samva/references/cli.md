@@ -1,0 +1,210 @@
+# CLI
+
+Use the `samva` CLI for terminal automation and operator workflows. Treat stdout as data and stderr
+as diagnostics. Run `samva <command> --help` before using a command with unfamiliar flags.
+
+- [Install and completions](#install-and-completions)
+- [Execution context](#execution-context)
+- [Command map](#command-map)
+- [Send and wait](#send-and-wait)
+- [Safe mutations and output](#safe-mutations-and-output)
+- [Pagination and exit codes](#pagination-and-exit-codes)
+- [Read-only readiness](#read-only-readiness)
+
+## Install and completions
+
+The npm package is `@samva/cli`; the executable is `samva`. It prefers a self-contained native
+executable and falls back to its packaged JavaScript implementation through Bun when npm omits
+optional dependencies.
+
+```bash
+npm install -g @samva/cli
+samva --help
+
+# Supported completion generators: bash, zsh, fish, and sh.
+samva --completions bash >> ~/.bashrc
+samva --completions zsh > ~/.zsh/completions/_samva
+samva --completions fish > ~/.config/fish/completions/samva.fish
+samva --completions sh
+```
+
+Create the target completion directory first when needed. `sh` is an alias for the Bash-compatible
+completion script. Regenerate a script after upgrading the CLI.
+
+## Execution context
+
+Prefer an API key for agents and CI:
+
+```bash
+export SAMVA_API_KEY="samva_sk_live_your_api_key"
+```
+
+An API key takes precedence over the stored OAuth credential and is already scoped to one
+organization. Do not send `--org` or set `SAMVA_ORG` with an API key: the CLI rejects that ambiguous
+combination.
+
+OAuth is appropriate for interactive multi-organization work:
+
+```bash
+samva login
+samva org list
+samva org use <slug>
+```
+
+`samva login` is interactive. In a non-TTY, agents use `SAMVA_API_KEY` or explicitly request the
+device flow with `samva login --no-browser`; `--no-input`, `--json`, and `--jsonl` reject login.
+If a stored OAuth record is malformed, run `samva logout` and then `samva login`; API-key calls do
+not read or decode stored OAuth credentials.
+
+Profiles keep non-secret target and organization settings. Credentials are stored in the OS keyring.
+
+```bash
+samva profile create local --target local
+samva --profile local email doctor --json
+```
+
+Resolution order is deterministic:
+
+| Setting            | Precedence                                                        |
+| ------------------ | ----------------------------------------------------------------- |
+| Profile            | `--profile`, `SAMVA_PROFILE`, active profile, `default`           |
+| API URL            | `--api-url`, `SAMVA_API_URL`, profile target, built-in target URL |
+| OAuth organization | `--org`, `SAMVA_ORG`, selected profile organization               |
+| Credential         | `SAMVA_API_KEY`, stored OAuth credential                          |
+
+`local` resolves to the Portless API origin `https://api.samva.localhost`.
+`production` resolves to `https://api.samva.dev`.
+
+## Command map
+
+| Intent                   | Commands                                                                                                                      |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| Session and organization | `samva login`, `logout`, and `org` with `list`, `use`, or `current`                                                           |
+| Email send and readiness | `samva email send`, `email doctor`, `email domains`, `email senders`, `email receiving`, `email design`, and `email tracking` |
+| Message inspection       | `samva messages` with `list`, `get`, `events`, or `wait`                                                                      |
+| Scheduled email          | `samva scheduled-messages` with `create`, `list`, `get`, or `cancel`                                                          |
+| Campaigns                | `samva campaigns` with `create`, `list`, `get`, `update`, `archive`, and the `runs` group                                     |
+| Templates                | `samva templates` with local-authoring and remote lifecycle commands                                                          |
+| Customer webhooks        | `samva webhooks` with `list`, `get`, `test`, `logs`, `stats`, `retry`, `rotate-secret`, `create`, `update`, or `remove`       |
+| Execution profiles       | `samva profile` with `list`, `show`, `create`, `use`, or `delete`                                                             |
+| Machine help             | `samva help --json`                                                                                                           |
+
+## Send and wait
+
+```bash
+samva email send \
+  --to ada@example.com \
+  --subject "Welcome to Samva" \
+  --text "Welcome" \
+  --idempotency-key "welcome:customer-123"
+
+printf 'Welcome' | samva email send \
+  --to ada@example.com \
+  --subject "Welcome to Samva" \
+  --text - \
+  --wait --timeout 2m
+
+render-email | samva email send \
+  --to ada@example.com \
+  --subject "Welcome to Samva" \
+  --html -
+```
+
+## Test a webhook endpoint
+
+```bash
+samva webhooks test <webhook-id> --dry-run
+samva webhooks test <webhook-id> --data '{"event":"webhook.test"}' --json
+samva webhooks test <webhook-id> --data @payload.json --json
+```
+
+The command sends a signed request by default. `--dry-run` only validates and previews the API
+request. A non-2xx response, timeout, or transport failure exits `1`; machine modes keep the
+complete test result on stdout and write the typed diagnostic to stderr.
+
+`--to` is repeatable. Inline email requires `--subject` plus exactly one of `--html` or `--text`.
+Pass `-` as the value to read that body from stdin: `--text -` reads a plain-text body and `--html -`
+reads an HTML body. Only one body may come from stdin, so passing both `--text -` and `--html -` is
+rejected. Template email uses exactly one of `--template-id` or `--template-slug`, optional
+`--template-data`, and omits `--subject`.
+
+Use one stable `--idempotency-key` per logical send. An identical retry returns the original
+message; a retry with changed recipients, content, template, or variables conflicts. `--wait` polls
+for delivered or read status, or a terminal delivery failure. Its default timeout is two minutes;
+`--timeout` requires `--wait`, and `--wait` cannot combine with `--dry-run` because a dry run makes
+no API call. A timeout or terminal failure keeps the last message output and exits non-zero.
+
+## Safe mutations and output
+
+```bash
+# Validate and print the request without calling the API.
+samva email send --to ada@example.com --subject "Hello" --text "Hi" --dry-run --json
+
+# Confirm a cancellation without an interactive prompt.
+samva scheduled-messages cancel <scheduled-message-id> --yes --json
+
+# Prevent all prompting and browser launches.
+samva --no-input profile delete local --yes
+```
+
+`--dry-run` is available on supported mutations and previews the intended request. `email send
+--dry-run` does not use credentials or call the API. Another preview can read state when needed to
+show the resulting change. Destructive operations prompt only in a TTY. Agents must pass `--yes` to
+confirm them, or the command fails without changing state. `--no-input` disallows prompts and browser
+launches.
+
+`--json` writes one versioned result envelope to stdout:
+`{schemaVersion:1,type:"result",command,data}`. `--jsonl` writes one such outer envelope per line.
+For resource lists, each outer envelope's `data` is the resource itself; `--all` changes traversal,
+not the record schema. Empty lists emit no records. `--quiet` suppresses successful output. These modes are
+mutually exclusive; assignment forms such as `--json=true` are usage errors. Machine-mode stdout
+contains only result data, while warnings and execution failures go to stderr as
+`{schemaVersion:1,type:"error",command,reason,message,next?}` diagnostics.
+
+## Pagination and exit codes
+
+```bash
+# Read one bounded page.
+samva messages list --page 1 --limit 50 --json
+
+# Traverse every page as streamable JSON Lines.
+samva messages list --all --jsonl
+```
+
+Lists are paginated by default. `--all` is intentionally allowed only with `--jsonl`; bounded and
+unbounded streams use the same flat outer result envelope.
+
+|  Code | Meaning                                                                      |
+| ----: | ---------------------------------------------------------------------------- |
+|   `0` | Success                                                                      |
+|   `1` | API, operational, or terminal delivery failure                               |
+|   `2` | Command syntax, validation, configuration, or confirmation failure           |
+|   `4` | Authentication or organization-context failure, including an expired session |
+| `124` | Wait or credential timeout                                                   |
+| `130` | Interrupted with `SIGINT`                                                    |
+| `143` | Terminated with `SIGTERM`                                                    |
+
+A machine-mode failure leaves stdout clean and writes its diagnostic to stderr. Lifecycle timeout,
+terminal delivery failure, and later observation failure instead preserve the last authoritative
+Message in a `{schemaVersion:1,type:"result",command,data,partial:true}` envelope on stdout first.
+Persist `data.id` and resume with `samva messages wait <message-id>`. A command that needs a
+subcommand, such as a bare `samva` or a group like `samva email`, prints its help to stdout and exits
+`2`; in machine mode the same case writes a single JSON diagnostic to stderr.
+
+## Read-only readiness
+
+```bash
+samva email doctor --json
+```
+
+`email doctor` reports the resolved profile, target, API URL, auth source, organization access,
+sending domains, senders, and domain-verification readback. It is read-only. It does not inspect
+receiving configuration, send an email, mutate configuration, verify DNS, replay fixtures, or verify
+provider readiness. Use `samva email receiving status <domain-id>` for a domain's receiving
+prerequisite status. `samva email receiving enable <domain-id> ...` is an ordinary mutation that
+acts by default; its `--dry-run` is offline and requires neither credentials nor an API call.
+
+Each check is `passed`, `failed`, or `unavailable`. A `failed` check carries the underlying error
+detail; `unavailable`, such as no sending domain configured yet, is informational. The command
+always prints the full report, then exits `1` if any check failed and `0` otherwise. The `--json`
+result's `data` adds an aggregate `ok` boolean, and human output marks checks with `✓`, `!`, and `✗`.
