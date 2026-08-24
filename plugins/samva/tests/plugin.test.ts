@@ -61,6 +61,22 @@ describe("Samva agent plugin contract", () => {
     );
   });
 
+  it("reports malformed primary JSON as a contract diagnostic", async () => {
+    const root = await fixture();
+    await writeFile(resolve(root, "plugins/samva/.mcp.json"), "{ not-json\n");
+    const errors = await validateAgentPlugin(root);
+    expect(errors.some((error) => error.startsWith("Cannot read Codex MCP config:"))).toBe(true);
+    expect(errors).toContain("Codex MCP config must define exactly one MCP server named samva");
+  });
+
+  it("reports a missing primary artifact as a contract diagnostic", async () => {
+    const root = await fixture();
+    await rm(resolve(root, "plugins/samva/provenance.json"));
+    const errors = await validateAgentPlugin(root);
+    expect(errors.some((error) => error.startsWith("Cannot read provenance:"))).toBe(true);
+    expect(errors).toContain("Provenance skill version must match SKILL.md");
+  });
+
   it("rejects a missing canonical reference", async () => {
     const root = await fixture();
     await rm(resolve(root, "plugins/samva/skills/samva/references/auth.md"));

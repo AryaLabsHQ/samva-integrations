@@ -15,8 +15,35 @@ const expectedReferences = [
 
 type JsonObject = Record<string, unknown>;
 
-const parseJson = async (path: string): Promise<JsonObject> =>
-  JSON.parse(await readFile(path, "utf8")) as JsonObject;
+const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+const parseJson = async (
+  errors: Array<string>,
+  path: string,
+  label: string,
+): Promise<JsonObject> => {
+  try {
+    const value: unknown = JSON.parse(await readFile(path, "utf8"));
+    if (!isObject(value)) {
+      errors.push(`${label} must contain a JSON object`);
+      return {};
+    }
+    return value;
+  } catch (error) {
+    errors.push(`Cannot read ${label}: ${errorMessage(error)}`);
+    return {};
+  }
+};
+
+const readText = async (errors: Array<string>, path: string, label: string): Promise<string> => {
+  try {
+    return await readFile(path, "utf8");
+  } catch (error) {
+    errors.push(`Cannot read ${label}: ${errorMessage(error)}`);
+    return "";
+  }
+};
 
 const isObject = (value: unknown): value is JsonObject =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -95,12 +122,19 @@ const validateMcp = (errors: Array<string>, label: string, config: JsonObject): 
 export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array<string>> => {
   const errors: Array<string> = [];
   const pluginRoot = resolve(repositoryRoot, "plugins/samva");
-  const codexManifest = await parseJson(resolve(pluginRoot, ".codex-plugin/plugin.json"));
-  const cursorManifest = await parseJson(resolve(pluginRoot, ".cursor-plugin/plugin.json"));
-  const marketplace = await parseJson(resolve(repositoryRoot, ".cursor-plugin/marketplace.json"));
-  const codexMcp = await parseJson(resolve(pluginRoot, ".mcp.json"));
-  const cursorMcp = await parseJson(resolve(pluginRoot, "mcp.json"));
-  const provenance = await parseJson(resolve(pluginRoot, "provenance.json"));
+  const [codexManifest, cursorManifest, marketplace, codexMcp, cursorMcp, provenance] =
+    await Promise.all([
+      parseJson(errors, resolve(pluginRoot, ".codex-plugin/plugin.json"), "Codex manifest"),
+      parseJson(errors, resolve(pluginRoot, ".cursor-plugin/plugin.json"), "Cursor manifest"),
+      parseJson(
+        errors,
+        resolve(repositoryRoot, ".cursor-plugin/marketplace.json"),
+        "Cursor marketplace",
+      ),
+      parseJson(errors, resolve(pluginRoot, ".mcp.json"), "Codex MCP config"),
+      parseJson(errors, resolve(pluginRoot, "mcp.json"), "Cursor MCP config"),
+      parseJson(errors, resolve(pluginRoot, "provenance.json"), "provenance"),
+    ]);
 
   const manifests = [
     ["Codex manifest", codexManifest],
@@ -138,7 +172,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   validateMcp(errors, "Cursor MCP config", cursorMcp);
 
   const skillRoot = resolve(pluginRoot, "skills/samva");
-  const skill = await readFile(resolve(skillRoot, "SKILL.md"), "utf8");
+  const skill = await readText(errors, resolve(skillRoot, "SKILL.md"), "SKILL.md");
   const version = skill.match(/metadata:\s*\n\s*version:\s*([^\s]+)/)?.[1];
   const provenanceSkill = provenance.skill;
   if (!isObject(provenanceSkill) || provenanceSkill.version !== version) {
@@ -155,7 +189,13 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
       }
     }),
   );
-  const unexpectedReferences = (await readdir(resolve(skillRoot, "references"))).filter(
+  let referenceFiles: Array<string> = [];
+  try {
+    referenceFiles = await readdir(resolve(skillRoot, "references"));
+  } catch (error) {
+    errors.push(`Cannot read skill references: ${errorMessage(error)}`);
+  }
+  const unexpectedReferences = referenceFiles.filter(
     (name) => name.endsWith(".md") && !expectedReferences.includes(name as never),
   );
   if (unexpectedReferences.length > 0) {
@@ -166,8 +206,14 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   const archive = isObject(provenanceSkill) ? provenanceSkill.archive : undefined;
   if (!isObject(bundle) || bundle.algorithm !== "sha256-file-list-v1") {
     errors.push("Provenance must declare sha256-file-list-v1 for the local bundle");
-  } else if (bundle.digest !== (await bundleDigest(pluginRoot))) {
-    errors.push("Skill bundle digest does not match provenance");
+  } else {
+    try {
+      if (bundle.digest !== (await bundleDigest(pluginRoot))) {
+        errors.push("Skill bundle digest does not match provenance");
+      }
+    } catch (error) {
+      errors.push(`Cannot calculate skill bundle digest: ${errorMessage(error)}`);
+    }
   }
   if (
     !isObject(archive) ||
@@ -188,9 +234,14 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     errors.push("Provenance must identify the canonical source repository, SHA, and path");
   }
 
-  const distributableFiles = (await filesBelow(pluginRoot)).filter((path) =>
-    /\.(?:json|md)$/i.test(path),
-  );
+  let distributableFiles: Array<string> = [];
+  try {
+    distributableFiles = (await filesBelow(pluginRoot)).filter((path) =>
+      /\.(?:json|md)$/i.test(path),
+    );
+  } catch (error) {
+    errors.push(`Cannot enumerate plugin files: ${errorMessage(error)}`);
+  }
   await Promise.all(
     distributableFiles.map(async (path) => {
       const text = await readFile(path, "utf8");
@@ -217,7 +268,11 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     }),
   );
 
-  const mcpReference = await readFile(resolve(skillRoot, "references/mcp.md"), "utf8");
+  const mcpReference = await readText(
+    errors,
+    resolve(skillRoot, "references/mcp.md"),
+    "MCP reference",
+  );
   for (const required of [
     "messages_send_email",
     "email_domains_remove",
@@ -229,6 +284,52 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   ]) {
     if (!mcpReference.includes(required)) errors.push(`MCP inventory is missing ${required}`);
   }
+
+  const reviewRequirements = new Map([
+    [
+      "review/openai.md",
+      [
+        "70-tool annotation inventory",
+        "messages_send_email",
+        "webhooks_retry_delivery",
+        "Reviewer account",
+        "Domain challenge",
+        "Submission preparation",
+      ],
+    ],
+    [
+      "review/claude.md",
+      [
+        "70 uniquely named tools",
+        "5 resources",
+        "permissionPromptMatched",
+        "not-run",
+        "Data and permission boundaries",
+        "External gate",
+      ],
+    ],
+    [
+      "review/cursor.md",
+      [
+        "~/.cursor/plugins/local/<plugin-name>/",
+        "cp -R plugins/samva",
+        "submission form",
+        "external approval gates",
+      ],
+    ],
+    [
+      "review/test-cases.md",
+      ["Automated package contract", "Positive prompts", "Negative prompts", "Expected outcome"],
+    ],
+  ]);
+  await Promise.all(
+    [...reviewRequirements].map(async ([path, requirements]) => {
+      const text = await readText(errors, resolve(pluginRoot, path), path);
+      for (const requirement of requirements) {
+        if (!text.includes(requirement)) errors.push(`${path} is missing ${requirement}`);
+      }
+    }),
+  );
 
   return errors;
 };
