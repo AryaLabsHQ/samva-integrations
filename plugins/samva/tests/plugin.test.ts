@@ -51,6 +51,14 @@ describe("Samva agent plugin contract", () => {
     );
   });
 
+  it("rejects repository naming in the branded Cursor marketplace identity", async () => {
+    const root = await fixture();
+    await editJson(root, ".cursor-plugin/marketplace.json", (value) => {
+      value.name = "samva-integrations";
+    });
+    expect(await validateAgentPlugin(root)).toContain("Cursor marketplace name must be samva");
+  });
+
   it("rejects credentials in MCP configuration", async () => {
     const root = await fixture();
     await editJson(root, "plugins/samva/.mcp.json", (value) => {

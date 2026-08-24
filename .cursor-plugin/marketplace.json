@@ -1,7 +1,7 @@
 {
-  "name": "samva-integrations",
+  "name": "samva",
   "owner": { "name": "Arya Labs, Inc." },
-  "metadata": { "description": "Official Samva integrations for coding agents." },
+  "metadata": { "description": "Official Samva coding-agent plugins and integrations." },
   "plugins": [
     {
       "name": "samva",

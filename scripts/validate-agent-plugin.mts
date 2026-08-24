@@ -159,6 +159,21 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     referencedPath(errors, pluginRoot, "Cursor logo", cursorManifest.logo),
   ]);
 
+  if (marketplace.name !== "samva") {
+    errors.push("Cursor marketplace name must be samva");
+  }
+  const marketplaceOwner = marketplace.owner;
+  if (!isObject(marketplaceOwner) || marketplaceOwner.name !== "Arya Labs, Inc.") {
+    errors.push("Cursor marketplace owner must be Arya Labs, Inc.");
+  }
+  const marketplaceMetadata = marketplace.metadata;
+  if (
+    !isObject(marketplaceMetadata) ||
+    marketplaceMetadata.description !== "Official Samva coding-agent plugins and integrations."
+  ) {
+    errors.push("Cursor marketplace description must use the canonical Samva description");
+  }
+
   if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length !== 1) {
     errors.push("Cursor marketplace must contain exactly one plugin");
   } else {
