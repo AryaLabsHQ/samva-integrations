@@ -1,4 +1,4 @@
-import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
@@ -75,6 +75,15 @@ describe("Samva agent plugin contract", () => {
     const errors = await validateAgentPlugin(root);
     expect(errors.some((error) => error.startsWith("Cannot read provenance:"))).toBe(true);
     expect(errors).toContain("Provenance skill version must match SKILL.md");
+  });
+
+  it("reports an enumerated file that disappears before reading", async () => {
+    const root = await fixture();
+    await symlink("missing-review-source.md", resolve(root, "plugins/samva/review/disappeared.md"));
+    const errors = await validateAgentPlugin(root);
+    expect(errors.some((error) => error.startsWith("Cannot read review/disappeared.md:"))).toBe(
+      true,
+    );
   });
 
   it("rejects a missing canonical reference", async () => {

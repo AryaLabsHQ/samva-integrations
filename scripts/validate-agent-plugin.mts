@@ -244,7 +244,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   }
   await Promise.all(
     distributableFiles.map(async (path) => {
-      const text = await readFile(path, "utf8");
+      const text = await readText(errors, path, relative(pluginRoot, path));
       if (/samva_sk_(?:live|test)_[A-Za-z0-9]{20,}/.test(text)) {
         errors.push(`Embedded Samva API key in ${relative(pluginRoot, path)}`);
       }
