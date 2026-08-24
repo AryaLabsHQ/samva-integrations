@@ -11,7 +11,7 @@ templates, handle delivery events, and verify signed webhooks.
 - `packages/*` — package integrations (`@samva/*`).
 - `examples/*` — complete, runnable example apps.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
-- `plugins/*` — coding-agent plugins and their review evidence.
+- `plugins/*` — coding-agent plugins and public documentation.
 
 The maintained integrations target the published Samva 0.2 email SDK. Workspace
 packages and examples use `samva@^0.2.0`; copyable external import maps pin

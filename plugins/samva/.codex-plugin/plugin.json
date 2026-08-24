@@ -21,7 +21,7 @@
     "termsOfServiceURL": "https://samva.dev/legal/terms",
     "defaultPrompt": [
       "Check whether my Samva email setup is ready",
-      "Send a transactional email with a stable idempotency key",
+      "Send a welcome email to a new customer",
       "Help me author and validate a Samva email template"
     ],
     "brandColor": "#111111",
