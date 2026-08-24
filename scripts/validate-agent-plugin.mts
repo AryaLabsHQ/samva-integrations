@@ -248,22 +248,12 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
       if (/samva_sk_(?:live|test)_[A-Za-z0-9]{20,}/.test(text)) {
         errors.push(`Embedded Samva API key in ${relative(pluginRoot, path)}`);
       }
-      if (/\b(?:challenge|portal)[_-]?(?:token|id)\s*[:=]\s*["']?[A-Za-z0-9_-]{12,}/i.test(text)) {
-        errors.push(`Embedded portal or challenge credential in ${relative(pluginRoot, path)}`);
-      }
       if (
         /\b(?:supports?|includes?|provides?)\s+(?:sms|whatsapp|code mode|openapi search)/i.test(
           text,
         )
       ) {
         errors.push(`Unsupported product claim in ${relative(pluginRoot, path)}`);
-      }
-      if (
-        /\b(?:submitted|approved|listed)\s+(?:to|in|on)\s+(?:the\s+)?(?:openai|cursor|claude)\b/i.test(
-          text,
-        )
-      ) {
-        errors.push(`Unsupported submission claim in ${relative(pluginRoot, path)}`);
       }
     }),
   );
@@ -285,45 +275,36 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     if (!mcpReference.includes(required)) errors.push(`MCP inventory is missing ${required}`);
   }
 
-  const reviewRequirements = new Map([
+  const publicDocRequirements = new Map([
     [
-      "review/openai.md",
+      "docs/codex-and-cursor.md",
       [
-        "70-tool annotation inventory",
-        "messages_send_email",
-        "webhooks_retry_delivery",
-        "Reviewer account",
-        "Domain challenge",
-        "Submission preparation",
+        ".codex-plugin/plugin.json",
+        ".cursor-plugin/marketplace.json",
+        "skills/samva/SKILL.md",
+        "https://mcp.samva.dev",
       ],
     ],
     [
-      "review/claude.md",
+      "docs/claude.md",
       [
-        "70 uniquely named tools",
-        "5 resources",
-        "permissionPromptMatched",
-        "not-run",
-        "Data and permission boundaries",
-        "External gate",
+        "does not package a Claude plugin",
+        "Streamable HTTP",
+        "Interactive OAuth",
+        "API-key clients",
       ],
     ],
     [
-      "review/cursor.md",
-      [
-        "~/.cursor/plugins/local/<plugin-name>/",
-        "cp -R plugins/samva",
-        "submission form",
-        "external approval gates",
-      ],
+      "docs/auth-and-permissions.md",
+      ["Data boundary", "Side-effect boundary", "70-tool inventory", "five operating references"],
     ],
     [
-      "review/test-cases.md",
-      ["Automated package contract", "Positive prompts", "Negative prompts", "Expected outcome"],
+      "docs/verification.md",
+      ["Automated package conformance", "Synthetic read examples", "Synthetic write examples"],
     ],
   ]);
   await Promise.all(
-    [...reviewRequirements].map(async ([path, requirements]) => {
+    [...publicDocRequirements].map(async ([path, requirements]) => {
       const text = await readText(errors, resolve(pluginRoot, path), path);
       for (const requirement of requirements) {
         if (!text.includes(requirement)) errors.push(`${path} is missing ${requirement}`);

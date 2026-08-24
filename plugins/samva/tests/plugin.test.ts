@@ -79,11 +79,9 @@ describe("Samva agent plugin contract", () => {
 
   it("reports an enumerated file that disappears before reading", async () => {
     const root = await fixture();
-    await symlink("missing-review-source.md", resolve(root, "plugins/samva/review/disappeared.md"));
+    await symlink("missing-doc-source.md", resolve(root, "plugins/samva/docs/disappeared.md"));
     const errors = await validateAgentPlugin(root);
-    expect(errors.some((error) => error.startsWith("Cannot read review/disappeared.md:"))).toBe(
-      true,
-    );
+    expect(errors.some((error) => error.startsWith("Cannot read docs/disappeared.md:"))).toBe(true);
   });
 
   it("rejects a missing canonical reference", async () => {
@@ -111,12 +109,11 @@ describe("Samva agent plugin contract", () => {
     );
   });
 
-  it("rejects unsupported product and submission claims", async () => {
+  it("rejects unsupported product claims", async () => {
     const root = await fixture();
-    const path = resolve(root, "plugins/samva/review/unsupported.md");
-    await writeFile(path, "This plugin supports SMS and was submitted to OpenAI.\n");
+    const path = resolve(root, "plugins/samva/docs/unsupported.md");
+    await writeFile(path, "This plugin supports SMS.\n");
     const errors = await validateAgentPlugin(root);
-    expect(errors).toContain("Unsupported product claim in review/unsupported.md");
-    expect(errors).toContain("Unsupported submission claim in review/unsupported.md");
+    expect(errors).toContain("Unsupported product claim in docs/unsupported.md");
   });
 });

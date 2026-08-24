@@ -13,8 +13,8 @@ user to authenticate. API-key clients may configure `SAMVA_API_KEY` or an
 `X-API-Key` header in their own private client settings; never add a key to this
 repository.
 
-The hosted server performs live organization-scoped reads and writes. Review
-each requested mutation before approving it, use a stable idempotency key for
+The hosted server performs live organization-scoped reads and writes. Confirm
+each requested mutation deliberately, use a stable idempotency key for
 retryable sends, and follow the revision-safe workflow for template edits.
 
 ## Included surfaces
@@ -28,8 +28,9 @@ Both manifests load `skills/samva/SKILL.md` and its six references. See
 [`provenance.json`](./provenance.json) for the source commit, public skill
 archive, version, and digests.
 
-## Review evidence
+## Public documentation
 
-The [`review`](./review) directory contains platform-specific preparation and
-the positive and negative contract cases. Run `bun run validate:agent-plugin`
-from the repository root for the focused packaging checks.
+The [`docs`](./docs) directory explains Codex and Cursor package loading,
+direct Claude MCP connection, authentication and permission boundaries, and
+synthetic verification examples. Run `bun run validate:agent-plugin` from the
+repository root for the automated packaging checks.
