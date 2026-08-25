@@ -278,6 +278,12 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     resolve(skillRoot, "references/mcp.md"),
     "MCP reference",
   );
+  const mcpInventory = mcpReference.match(
+    /<!-- email-launch-mcp-tools:start -->([\s\S]*?)<!-- email-launch-mcp-tools:end -->/,
+  )?.[1];
+  if (mcpInventory === undefined) {
+    errors.push("MCP reference is missing the canonical tool inventory block");
+  }
   for (const required of [
     "messages_send_email",
     "email_domains_remove",
@@ -290,7 +296,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     if (!mcpReference.includes(required)) errors.push(`MCP inventory is missing ${required}`);
   }
   for (const unavailable of ["messages_list_inbound_email"]) {
-    if (mcpReference.includes(unavailable)) {
+    if (mcpInventory?.includes(unavailable)) {
       errors.push(`MCP inventory includes unavailable ${unavailable}`);
     }
   }
