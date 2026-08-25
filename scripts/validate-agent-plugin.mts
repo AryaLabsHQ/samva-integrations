@@ -289,6 +289,11 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   ]) {
     if (!mcpReference.includes(required)) errors.push(`MCP inventory is missing ${required}`);
   }
+  for (const unavailable of ["messages_list_inbound_email"]) {
+    if (mcpReference.includes(unavailable)) {
+      errors.push(`MCP inventory includes unavailable ${unavailable}`);
+    }
+  }
 
   const publicDocRequirements = new Map([
     [
@@ -311,7 +316,12 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     ],
     [
       "docs/auth-and-permissions.md",
-      ["Data boundary", "Side-effect boundary", "70-tool inventory", "five operating references"],
+      [
+        "Data boundary",
+        "Side-effect boundary",
+        "canonical MCP tool inventory",
+        "five operating references",
+      ],
     ],
     [
       "docs/verification.md",

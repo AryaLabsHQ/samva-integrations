@@ -29,7 +29,7 @@ Write tools can persist Samva resources. Some tools also deliver traffic
 outside Samva. The hosted server's tool-level MCP annotations are authoritative
 and should be shown by the client before invocation.
 
-The canonical 70-tool inventory marks these external deliveries as
+The canonical MCP tool inventory marks these external deliveries as
 `readOnlyHint: false`, `destructiveHint: true`, and `openWorldHint: true`:
 
 - `messages_send_email`

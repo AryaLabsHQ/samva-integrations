@@ -117,6 +117,15 @@ describe("Samva agent plugin contract", () => {
     );
   });
 
+  it("rejects tools that are unavailable in the canonical MCP surface", async () => {
+    const root = await fixture();
+    const path = resolve(root, "plugins/samva/skills/samva/references/mcp.md");
+    await writeFile(path, `${await readFile(path, "utf8")}\nmessages_list_inbound_email\n`);
+    expect(await validateAgentPlugin(root)).toContain(
+      "MCP inventory includes unavailable messages_list_inbound_email",
+    );
+  });
+
   it("rejects unsupported product claims", async () => {
     const root = await fixture();
     const path = resolve(root, "plugins/samva/docs/unsupported.md");
