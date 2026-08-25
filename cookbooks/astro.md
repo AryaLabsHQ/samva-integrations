@@ -338,7 +338,7 @@ Prefer `astro:env/server` with an
 Never use `PUBLIC_SAMVA_API_KEY`.
 
 **Why no `from`?** Samva sends from the verified sender on your account at
-[samva.app](https://samva.app).
+[samva.dev](https://samva.dev).
 
 **Can this run on Cloudflare Workers?** Yes.
 The SDK is `fetch`-based.

@@ -13,7 +13,7 @@ The payload is the same. This cookbook covers the Effect runtime.
 ## Setup
 
 ```sh
-bun add samva effect@4.0.0-beta.102
+bun add samva effect@4.0.0-rc.111
 ```
 
 Keep `SAMVA_API_KEY` on the server.
@@ -236,7 +236,7 @@ The [`examples/effect-sdk`](../examples/effect-sdk) app includes:
 ## FAQ
 
 **Why is there no `from`?** Samva sends from the verified sender on your
-account. Configure senders at [samva.app](https://samva.app).
+account. Configure senders at [samva.dev](https://samva.dev).
 
 **Where should the API key live?** Only on the server or in an edge environment
 binding. Do not expose it to browser code.

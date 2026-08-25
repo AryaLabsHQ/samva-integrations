@@ -1,7 +1,7 @@
 # Hono + Cloudflare Workers + Samva
 
 A deployable [Hono](https://hono.dev) Worker that sends email through
-[Samva](https://samva.app). The send path uses Worker bindings and `fetch`; it
+[Samva](https://samva.dev). The send path uses Worker bindings and `fetch`; it
 does not need SMTP, Node APIs, or `nodejs_compat`.
 
 ## Setup

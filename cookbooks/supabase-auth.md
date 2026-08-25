@@ -30,7 +30,7 @@ For a Supabase Edge Function, map those imports in `deno.json`:
     "react": "npm:react@19.0.0",
     "react/jsx-runtime": "npm:react@19.0.0/jsx-runtime",
     "react-email": "npm:react-email@6.6.5",
-    "samva": "npm:samva@0.2.0",
+    "samva": "npm:samva@0.3.0",
     "standardwebhooks": "npm:standardwebhooks@1.0.0"
   }
 }
@@ -223,4 +223,4 @@ Official references:
 - [Supabase Send Email Hook](https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook)
 - [Supabase Auth Hooks](https://supabase.com/docs/guides/auth/auth-hooks)
 - [Supabase Custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp)
-- [Samva](https://samva.app)
+- [Samva](https://samva.dev)

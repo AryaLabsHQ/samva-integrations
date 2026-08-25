@@ -1,7 +1,7 @@
 # React Email + Samva
 
 Render a [React Email](https://react.email) template to HTML and send it with
-[Samva](https://samva.app). This is the **"samva"** entry in the React Email
+[Samva](https://samva.dev). This is the **"samva"** entry in the React Email
 provider matrix.
 
 ## Setup

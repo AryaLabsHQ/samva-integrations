@@ -1,7 +1,7 @@
 # SvelteKit Transactional Email
 
 A self-contained SvelteKit app that sends transactional email with
-[Samva](https://samva.app).
+[Samva](https://samva.dev).
 
 It includes both common SvelteKit send paths:
 
