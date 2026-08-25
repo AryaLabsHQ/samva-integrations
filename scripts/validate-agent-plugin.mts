@@ -278,16 +278,28 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     resolve(skillRoot, "references/mcp.md"),
     "MCP reference",
   );
+  const mcpInventory = mcpReference.match(
+    /<!-- email-launch-mcp-tools:start -->([\s\S]*?)<!-- email-launch-mcp-tools:end -->/,
+  )?.[1];
+  if (mcpInventory === undefined) {
+    errors.push("MCP reference is missing the canonical tool inventory block");
+  }
   for (const required of [
     "messages_send_email",
     "email_domains_remove",
     "templates_publish_document",
     "scheduled_messages_cancel",
     "campaigns_control_run",
-    "samva://reference/sml-agent-contract",
-    "idempotentHint: false",
   ]) {
-    if (!mcpReference.includes(required)) errors.push(`MCP inventory is missing ${required}`);
+    if (!mcpInventory?.includes(required)) errors.push(`MCP inventory is missing ${required}`);
+  }
+  for (const required of ["samva://reference/sml-agent-contract", "idempotentHint: false"]) {
+    if (!mcpReference.includes(required)) errors.push(`MCP reference is missing ${required}`);
+  }
+  for (const unavailable of ["messages_list_inbound_email"]) {
+    if (mcpInventory?.includes(unavailable)) {
+      errors.push(`MCP inventory includes unavailable ${unavailable}`);
+    }
   }
 
   const publicDocRequirements = new Map([
@@ -311,7 +323,12 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
     ],
     [
       "docs/auth-and-permissions.md",
-      ["Data boundary", "Side-effect boundary", "70-tool inventory", "five operating references"],
+      [
+        "Data boundary",
+        "Side-effect boundary",
+        "canonical MCP tool inventory",
+        "five operating references",
+      ],
     ],
     [
       "docs/verification.md",
