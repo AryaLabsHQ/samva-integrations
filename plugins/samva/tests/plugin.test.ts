@@ -142,6 +142,16 @@ describe("Samva agent plugin contract", () => {
     );
   });
 
+  it("rejects required tools missing from the inventory even when prose mentions them", async () => {
+    const root = await fixture();
+    const path = resolve(root, "plugins/samva/skills/samva/references/mcp.md");
+    const reference = await readFile(path, "utf8");
+    await writeFile(path, reference.replace("`messages_send_email`, ", ""));
+    expect(await validateAgentPlugin(root)).toContain(
+      "MCP inventory is missing messages_send_email",
+    );
+  });
+
   it("rejects unsupported product claims", async () => {
     const root = await fixture();
     const path = resolve(root, "plugins/samva/docs/unsupported.md");
