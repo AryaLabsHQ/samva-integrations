@@ -2,12 +2,32 @@
 
 This repository uses [Tegami](https://tegami.fuma-nama.dev) for changelogs,
 version pull requests, npm publication, Git tags, and GitHub Releases.
-Releases are attended local sessions; GitHub Actions does not publish packages.
+
+GitHub Actions publishes the public packages. `.github/workflows/publish.yml`
+runs `bun run tegami ci` on every push to `main`. That command versions first:
+if `.tegami/` has pending changelog files, it opens or updates a Version
+Packages pull request. If there is nothing to version, it publishes from
+`.tegami/publish-lock.yaml`. Merging the Version Packages PR is the human gate;
+the following `main` push publishes. Do not auto-merge that PR with
+`GITHUB_TOKEN` — GitHub will not re-run workflows for commits created by that
+token, so publish would never start.
+
+Authentication is npm trusted publishing (OIDC). The workflow sets
+`id-token: write` and does not use an `NPM_TOKEN`. Each public package on
+npmjs.com must list GitHub Actions trusted publisher
+`AryaLabsHQ/samva-integrations` with workflow filename `publish.yml` and no
+environment name. Do not rename `publish.yml`; npm pins that filename.
+
+This repository is public, so npm attaches provenance attestations to trusted
+publishes. Current `0.1.1` tarballs were attended local publishes and have none.
 
 The public packages version independently:
 
 - `@samva/better-auth` — release group `better-auth`
 - `@samva/email-sdk` — release group `email-sdk`
+
+Pull requests that add Tegami changelog files get a release preview comment
+from the split `tegami-pr.yml` / `tegami-pr-comment.yml` workflows.
 
 ## Queue a change
 
@@ -29,45 +49,39 @@ Use `@samva/better-auth`, `@samva/email-sdk`, `group:better-auth`, or
 `group:email-sdk` as the package key, with a `patch`, `minor`, or `major` bump.
 Commit the pending changelog with the user-visible change it describes. Do not
 edit package `CHANGELOG.md` files or `.tegami/publish-lock.yaml` directly.
+After the changelog reaches `main`, Actions opens the Version Packages pull
+request.
 
-## Prepare the version pull request
+## Version Packages pull request
 
-Start from a clean, current `main` with GitHub CLI authentication:
+Review the generated version bump, changelog aggregation, lockfile, and
+`.tegami/publish-lock.yaml`. Merge it in the GitHub UI (or with a
+non-`GITHUB_TOKEN` actor). The next `publish.yml` run publishes and creates
+GitHub Releases.
 
-```sh
-bun install --frozen-lockfile
-bun run version:packages
-```
+`afterPreflight` still runs `bun run release:packages:check`: it builds each
+canonical package root and audits the npm tarball.
 
-The version command passes the authenticated `gh` token to Tegami. Tegami
-consumes pending changelogs, updates package versions and changelogs, refreshes
-`bun.lock`, writes `.tegami/publish-lock.yaml`, pushes `tegami/version-packages`,
-and opens or updates a pull request against `main`. Review and merge that pull
-request before publishing.
-
-## Publish
-
-From the clean, current merged `main`, authenticate npm and run the attended
-release:
+## Verify a publish
 
 ```sh
-npm whoami
-gh auth status
-bun run release
-```
-
-The release command runs the full repository gates, passes the authenticated
-`gh` token to Tegami, audits each canonical npm tarball, publishes planned
-packages, then pushes group tags and creates matching GitHub Releases.
-
-Verify the result for each affected package:
-
-```sh
+gh run list --workflow=publish.yml --branch main --limit 5
 npm view @samva/better-auth version dist-tags --json
 npm view @samva/email-sdk version dist-tags --json
 gh release list --limit 10
 ```
 
-Do not publish from a dirty worktree. If a release stops partway through, check
-npm versions, Git tags, GitHub Releases, and Tegami publish status before
-resuming or cleaning up the publish lock.
+If a publish job fails partway through, fix the cause and re-run the same
+workflow. The publish lock makes retries safe.
+
+## Emergency local publish
+
+Use laptop publish only when Actions cannot. From a clean, current `main` with
+npm 2FA:
+
+```sh
+npm whoami
+GH_TOKEN="$(gh auth token)" bun run release
+```
+
+Restore CI as the default path after that emergency succeeds.
