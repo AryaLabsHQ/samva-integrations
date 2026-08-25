@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 
 /**
- * Attended release configuration for Samva integration packages.
+ * CI and local release config for Samva integration packages.
  *
  * Tegami owns changelogs, version pull requests, npm registry preflight,
  * dependency ordering, publication, Git tags, and GitHub Releases. Repository
@@ -48,6 +48,10 @@ const paper = tegami({
   npm: {
     client: "bun",
     updateLockFile: true,
+    trustedPublish: {
+      provider: "github",
+      workflow: "publish.yml",
+    },
     onBreakPeerDep: "error",
     bumpDep: ({ dependent, kind }) => {
       if (dependent.manifest.private === true) return false;
@@ -77,7 +81,7 @@ const paper = tegami({
       versionPr: {
         branch: "tegami/version-packages",
         base: "main",
-        forceCreate: true,
+        forceCreate: false,
         create() {
           return { title: "chore(release): prepare integration packages" };
         },
