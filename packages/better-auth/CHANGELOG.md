@@ -1,3 +1,9 @@
+## @samva/better-auth@0.1.1
+
+### Support Samva 0.3
+
+Expand the Samva peer dependency to support the current public email SDK.
+
 ## @samva/better-auth@0.1.0
 
 ### Initial Better Auth integration
