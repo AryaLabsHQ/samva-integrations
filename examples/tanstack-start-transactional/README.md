@@ -1,7 +1,7 @@
 # TanStack Start Transactional Email
 
 A self-contained TanStack Start app that sends transactional email with
-[Samva](https://samva.app).
+[Samva](https://samva.dev).
 
 It includes both common TanStack Start send paths:
 

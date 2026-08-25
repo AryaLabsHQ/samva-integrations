@@ -227,5 +227,5 @@ middleware, and full `auth.ts` with the adapter elsewhere.
 See the [Auth.js v5 migration guide](https://authjs.dev/getting-started/migrating-to-v5).
 
 **Can I track delivery and bounces?** Use Samva webhooks for delivery events.
-The [Samva webhooks docs](https://samva.app/docs/integrations/webhooks) cover
+The [Samva webhooks docs](https://samva.dev/docs/integrations/webhooks) cover
 signature verification and event handling.

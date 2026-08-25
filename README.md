@@ -1,7 +1,7 @@
 # Samva Integrations
 
 Open-source packages, examples, and cookbooks for integrating
-[Samva](https://samva.app) into real applications.
+[Samva](https://samva.dev) into real applications.
 
 Use these to send transactional email, connect auth email flows, work with
 templates, handle delivery events, and verify signed webhooks.
@@ -13,9 +13,9 @@ templates, handle delivery events, and verify signed webhooks.
 - `cookbooks/*.md` — documentation-first, copy-pasteable recipes.
 - `plugins/*` — coding-agent plugins and public documentation.
 
-The maintained integrations target the published Samva 0.2 email SDK. Workspace
-packages and examples use `samva@^0.2.0`; copyable external import maps pin
-`samva@0.2.0`.
+The maintained integrations target the published Samva 0.3 email SDK. Workspace
+packages and examples use `samva@^0.3.0`; copyable external import maps pin
+`samva@0.3.0`.
 
 ## Package integrations
 

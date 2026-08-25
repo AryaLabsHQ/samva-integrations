@@ -4,7 +4,7 @@
 email. You get typed props, reusable components, and Tailwind instead of
 hand-written table markup.
 Samva is the `samva` entry in its provider matrix.
-Render a template to HTML. Then send it with the [Samva](https://samva.app) SDK.
+Render a template to HTML. Then send it with the [Samva](https://samva.dev) SDK.
 
 React Email is your dependency. It renders. Samva sends the rendered string.
 Neither locks you into the other.
@@ -175,7 +175,7 @@ Server Action, see the [Next.js cookbook](./nextjs.md).
 
 **Why no `from`?** Samva sends from the verified domain or sender on your
 account, so the sender is never in the payload. Configure senders at
-[samva.app](https://samva.app).
+[samva.dev](https://samva.dev).
 
 **`render` returns a Promise.** It is async in v6. `await` it.
 Calling it without `await` yields a `Promise`, not a string.

@@ -266,10 +266,10 @@ knows whether Samva accepted the message. For bulk or post-response work, enqueu
 a job or use the host's background primitive such as `waitUntil` or `after`.
 
 **Where is `from`?** Samva sends from the verified sender on your account at
-[samva.app](https://samva.app). Do not add a `from` field.
+[samva.dev](https://samva.dev). Do not add a `from` field.
 
 **What about webhooks?** Receiving and verifying Samva webhooks is a separate
-flow. See the [webhooks guide](https://samva.app/docs/integrations/webhooks)
+flow. See the [webhooks guide](https://samva.dev/docs/integrations/webhooks)
 and the `samva/webhooks` SDK subpath.
 
 ## Runnable example

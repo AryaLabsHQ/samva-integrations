@@ -321,7 +321,7 @@ For deeper Auth.js wiring and React Email templates, see the
 Use `+server.ts` for JSON clients, external services, and webhook endpoints.
 
 **Where is `from`?** Samva sends from the verified sender on your account at
-[samva.app](https://samva.app). Do not add a `from` field.
+[samva.dev](https://samva.dev). Do not add a `from` field.
 
 **`$env/static/private` or `$env/dynamic/private`?** Use dynamic for cloneable
 examples and hosts that inject secrets at runtime.
@@ -339,7 +339,7 @@ It may rerun during navigation, invalidation, or preloading.
 Send from actions, endpoints, hooks, or background jobs.
 
 **What about webhooks?** Receiving and verifying Samva webhooks is a separate
-flow. See the [webhooks guide](https://samva.app/docs/integrations/webhooks)
+flow. See the [webhooks guide](https://samva.dev/docs/integrations/webhooks)
 and the `samva/webhooks` SDK subpath.
 
 ## Runnable example
