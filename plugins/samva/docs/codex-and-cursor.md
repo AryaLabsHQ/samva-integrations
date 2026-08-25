@@ -5,7 +5,9 @@ The Samva package gives Codex and Cursor the same two public components:
 - the canonical Samva agent skill under `skills/samva/`
 - one remote Streamable HTTP MCP server at `https://mcp.samva.dev`
 
-No credential is embedded in either client configuration.
+No secret is embedded in either client configuration. Cursor's configuration
+includes Samva's public, pre-registered OAuth client ID; Codex uses Client ID
+Metadata Document discovery.
 
 ## Codex
 
@@ -40,6 +42,12 @@ MCP server from `mcp.json`.
 The Cursor manifest requires Cursor `3.13.0` or newer, matching the remote-MCP
 plugin schema used by the public marketplace examples on which this package is
 based.
+
+Cursor currently requires either Dynamic Client Registration or static client
+metadata. Samva keeps unauthenticated registration disabled, so `mcp.json`
+supplies the public `samva-cursor-plugin` client ID and the supported scopes.
+The client has no secret, requires PKCE, and permits Cursor's desktop and web
+OAuth callback URLs.
 
 ## Shared behavior
 

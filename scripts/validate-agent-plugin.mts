@@ -4,6 +4,8 @@ import { dirname, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const canonicalEndpoint = "https://mcp.samva.dev";
+const cursorClientId = "samva-cursor-plugin";
+const oauthScopes = ["openid", "profile", "email", "offline_access"] as const;
 const expectedReferences = [
   "auth.md",
   "cli.md",
@@ -101,7 +103,12 @@ const referencedPath = async (
   }
 };
 
-const validateMcp = (errors: Array<string>, label: string, config: JsonObject): void => {
+const validateMcp = (
+  errors: Array<string>,
+  label: string,
+  config: JsonObject,
+  requireCursorAuth = false,
+): void => {
   const servers = config.mcpServers;
   if (!isObject(servers) || Object.keys(servers).length !== 1 || !isObject(servers.samva)) {
     errors.push(`${label} must define exactly one MCP server named samva`);
@@ -111,11 +118,25 @@ const validateMcp = (errors: Array<string>, label: string, config: JsonObject): 
   if (server.type !== "http" || server.url !== canonicalEndpoint) {
     errors.push(`${label} must use the canonical HTTP endpoint ${canonicalEndpoint}`);
   }
-  const extraKeys = Object.keys(server).filter((key) => key !== "type" && key !== "url");
+  const allowedKeys = requireCursorAuth ? ["type", "url", "auth"] : ["type", "url"];
+  const extraKeys = Object.keys(server).filter((key) => !allowedKeys.includes(key));
   if (extraKeys.length > 0) {
     errors.push(
       `${label} contains unsupported or credential-bearing keys: ${extraKeys.join(", ")}`,
     );
+  }
+  if (requireCursorAuth) {
+    const auth = server.auth;
+    if (
+      !isObject(auth) ||
+      auth.CLIENT_ID !== cursorClientId ||
+      !Array.isArray(auth.scopes) ||
+      auth.scopes.length !== oauthScopes.length ||
+      !oauthScopes.every((scope, index) => auth.scopes?.[index] === scope) ||
+      Object.keys(auth).some((key) => key !== "CLIENT_ID" && key !== "scopes")
+    ) {
+      errors.push(`${label} must use Samva's pre-registered public OAuth client`);
+    }
   }
 };
 
@@ -142,7 +163,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   ] as const;
   for (const [label, manifest] of manifests) {
     if (manifest.name !== "samva") errors.push(`${label} name must be samva`);
-    if (manifest.version !== "0.2.1") errors.push(`${label} version must be 0.2.1`);
+    if (manifest.version !== "0.2.2") errors.push(`${label} version must be 0.2.2`);
   }
   await Promise.all([
     ...manifests.flatMap(([label, manifest]) => [
@@ -184,7 +205,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   }
 
   validateMcp(errors, "Codex MCP config", codexMcp);
-  validateMcp(errors, "Cursor MCP config", cursorMcp);
+  validateMcp(errors, "Cursor MCP config", cursorMcp, true);
 
   const skillRoot = resolve(pluginRoot, "skills/samva");
   const skill = await readText(errors, resolve(skillRoot, "SKILL.md"), "SKILL.md");

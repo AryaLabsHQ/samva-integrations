@@ -11,6 +11,10 @@ who is acting:
 Keep API keys in private client secret storage. Never commit them to an MCP
 configuration, environment example, prompt, or evidence file.
 
+The Cursor package includes the public OAuth client ID
+`samva-cursor-plugin`. It is not a secret: the registered client authenticates
+as a public client and Samva requires PKCE for every authorization-code flow.
+
 ## Data boundary
 
 Read tools can expose the authenticated organization's email configuration,

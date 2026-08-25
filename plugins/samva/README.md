@@ -7,11 +7,13 @@ dashboard, and SML template editor.
 
 ## Authentication
 
-The MCP configuration intentionally contains no credentials. On first use, an
-OAuth-capable client follows Samva's protected-resource discovery and asks the
-user to authenticate. API-key clients may configure `SAMVA_API_KEY` or an
-`X-API-Key` header in their own private client settings; never add a key to this
-repository.
+The MCP configurations contain no secrets. On first use, an OAuth-capable
+client follows Samva's protected-resource discovery and asks the user to
+authenticate. Cursor's configuration names Samva's pre-registered public OAuth
+client because Cursor does not currently consume Client ID Metadata Documents;
+the client ID is a public identifier and the flow still requires PKCE. API-key
+clients may configure `SAMVA_API_KEY` or an `X-API-Key` header in their own
+private client settings; never add a key to this repository.
 
 The hosted server performs live organization-scoped reads and writes. Confirm
 each requested mutation deliberately, use a stable idempotency key for

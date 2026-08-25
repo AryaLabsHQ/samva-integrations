@@ -1,5 +1,12 @@
 {
   "mcpServers": {
-    "samva": { "type": "http", "url": "https://mcp.samva.dev" }
+    "samva": {
+      "type": "http",
+      "url": "https://mcp.samva.dev",
+      "auth": {
+        "CLIENT_ID": "samva-cursor-plugin",
+        "scopes": ["openid", "profile", "email", "offline_access"]
+      }
+    }
   }
 }
