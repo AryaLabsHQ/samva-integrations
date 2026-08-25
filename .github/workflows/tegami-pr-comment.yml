@@ -38,10 +38,11 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: tegami-pr-preview
+          path: ${{ runner.temp }}/tegami-pr-preview
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
 
       - name: Post preview comment
-        run: bun run tegami pr comment tegami-pr-preview.md
+        run: bun run tegami pr comment "$RUNNER_TEMP/tegami-pr-preview/tegami-pr-preview.md"
         env:
           GITHUB_TOKEN: ${{ github.token }}
