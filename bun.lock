@@ -6,7 +6,7 @@
       "name": "samva-integrations",
       "devDependencies": {
         "@tsconfig/bun": "^1.0.10",
-        "@types/bun": "^1.3.14",
+        "@types/bun": "^1.4.0",
         "@typescript/native-preview": "^7.0.0-dev.20260624.1",
         "oxfmt": "^0.54.0",
         "oxlint": "^1.69.0",
@@ -78,7 +78,7 @@
         "samva": "^0.3.0",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.14",
+        "@types/bun": "^1.4.0",
       },
     },
     "examples/email-sdk": {
@@ -90,7 +90,7 @@
         "samva": "^0.3.0",
       },
       "devDependencies": {
-        "@types/bun": "^1.3.14",
+        "@types/bun": "^1.4.0",
       },
     },
     "examples/hono-cloudflare-workers": {
@@ -194,7 +194,7 @@
     },
     "packages/better-auth": {
       "name": "@samva/better-auth",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@react-email/render": "^2.0.0",
         "better-auth": "^1.7.0-beta.9",
@@ -211,7 +211,7 @@
     },
     "packages/email-sdk": {
       "name": "@samva/email-sdk",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "devDependencies": {
         "@opencoredev/email-sdk": "^1.1.0",
         "samva": "^0.3.0",
@@ -883,7 +883,7 @@
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.3", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg=="],
 
-    "@types/bun": ["@types/bun@1.3.14", "", { "dependencies": { "bun-types": "1.3.14" } }, "sha512-h1hFqFVcvAvD9j9K7ZW7vd82aSA+rTdznZa+5bwvCwqSB1jmmfLcbIWhOLx1/+boy/xmjgCs/OMUL8hRJSmnPw=="],
+    "@types/bun": ["@types/bun@1.4.0", "", { "dependencies": { "bun-types": "1.4.0" } }, "sha512-K+lZULY23vRgK/CfTjFIV+tyifaNdSMlPh9j+6mQ/cLfpOznLyAuzgV/JQysyECpkBQLVMSyvjlr2fBUSA9wFQ=="],
 
     "@types/chai": ["@types/chai@5.2.3", "", { "dependencies": { "@types/deep-eql": "*", "assertion-error": "^2.0.1" } }, "sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA=="],
 
@@ -1031,7 +1031,7 @@
 
     "browserslist": ["browserslist@4.28.8", "", { "dependencies": { "baseline-browser-mapping": "^2.11.12", "caniuse-lite": "^1.0.30001809", "electron-to-chromium": "^1.5.402", "node-releases": "^2.0.53", "update-browserslist-db": "^1.3.0" }, "bin": { "browserslist": "cli.js" } }, "sha512-V2NpofLblG64mfOtSgDhOJESZEGogzDMBv/q+W6oc4LXWP/q75eOXoOaaOu1EOadB9U4Bwx/e0yzbvwKH8zalA=="],
 
-    "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
+    "bun-types": ["bun-types@1.4.0", "", { "dependencies": { "@types/node": "*" } }, "sha512-iIKw23BspnQQYd3prITOBxeUsxBHnwzX6YJfGMuNOZzeNcMmVqzIIVGRm1l69ogaPQmb4wB6BN8mA5bE9YuC5Q=="],
 
     "cac": ["cac@6.7.14", "", {}, "sha512-b6Ilus+c3RrdDk+JhLKUAQfzzgLEPy6wcXqS7f/xe1EETvsDP6GORG7SFuOs6cID5YkqchW/LXZbX5bc8j7ZcQ=="],
 
