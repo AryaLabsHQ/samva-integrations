@@ -63,6 +63,8 @@ User-visible package changes also need a pending Tegami changelog under
 `.tegami/`. See [the release guide](./docs/releases.md) for the file format and
 package names. Commit the changelog with the implementation it describes; do
 not edit package `CHANGELOG.md` files or `.tegami/publish-lock.yaml` directly.
+After the changelog reaches `main`, GitHub Actions opens the Version Packages
+pull request.
 
 ## Proposing a new integration
 

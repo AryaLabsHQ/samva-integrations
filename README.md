@@ -90,8 +90,9 @@ bun run format:check
 
 Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) for local
 setup, package conventions, and how to propose a new integration. Maintainers
-use the attended [Tegami release flow](./docs/releases.md) for package versions,
-changelogs, npm publication, tags, and GitHub Releases.
+use the [Tegami release flow](./docs/releases.md) for package versions,
+changelogs, npm publication, tags, and GitHub Releases. GitHub Actions
+publishes; merging the Version Packages pull request is the human gate.
 
 ## Security
 
