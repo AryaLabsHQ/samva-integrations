@@ -125,11 +125,11 @@ describe("Samva agent plugin contract", () => {
       path,
       reference.replace(
         "`messages_list_email_events`",
-        "`messages_list_email_events`, `messages_list_inbound_email`",
+        "`messages_list_email_events`, `templates_set_font`",
       ),
     );
     expect(await validateAgentPlugin(root)).toContain(
-      "MCP inventory includes unavailable messages_list_inbound_email",
+      "MCP inventory includes unavailable templates_set_font",
     );
   });
 

@@ -317,7 +317,7 @@ export const validateAgentPlugin = async (repositoryRoot: string): Promise<Array
   for (const required of ["samva://reference/sml-agent-contract", "idempotentHint: false"]) {
     if (!mcpReference.includes(required)) errors.push(`MCP reference is missing ${required}`);
   }
-  for (const unavailable of ["messages_list_inbound_email"]) {
+  for (const unavailable of ["messages_list_inbound_email", "templates_set_font"]) {
     if (mcpInventory?.includes(unavailable)) {
       errors.push(`MCP inventory includes unavailable ${unavailable}`);
     }

@@ -9,7 +9,7 @@ description: >-
   `samva` package, `@samva/cli`, mcp.samva.dev, SAMVA_API_KEY, SML, Samva
   Markup Language, and template editor agent.
 metadata:
-  version: 0.2.1
+  version: 0.2.2
 ---
 
 # Samva

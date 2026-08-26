@@ -47,9 +47,6 @@ Use tool discovery for input schemas. The current public families are:
 The hosted MCP surface provides usage totals and email proof reads. It does not provide entitlement,
 billing-status, or billing-portal tools.
 
-`tools/list` still includes `templates_set_font`. The call returns unavailable. Set brand fonts in the dashboard brand kit.
-Then apply the `font-{token}` class with `templates_apply_ops` or `templates_write_source`.
-
 ## Resources
 
 | URI                                    | Contents                                                    |
