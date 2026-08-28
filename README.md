@@ -1,6 +1,6 @@
-# Samva Integrations
+# Samva
 
-Open-source packages, examples, and cookbooks for integrating
+Open-source packages, examples, cookbooks, and agent plugins for integrating
 [Samva](https://samva.dev) into real applications.
 
 Use these to send transactional email, connect auth email flows, work with

@@ -4,7 +4,7 @@
   "description": "Integrate and operate Samva email with the canonical hosted MCP server and Samva agent skill.",
   "author": { "name": "Arya Labs, Inc.", "url": "https://samva.dev" },
   "homepage": "https://samva.dev/docs/developers/mcp",
-  "repository": "https://github.com/AryaLabsHQ/samva-integrations",
+  "repository": "https://github.com/SamvaHQ/samva",
   "license": "MIT",
   "keywords": ["samva", "email", "mcp", "agent-skills", "transactional-email"],
   "skills": "./skills/",

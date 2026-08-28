@@ -6,7 +6,7 @@ customer result.
 
 ## Automated package conformance
 
-Run from the `samva-integrations` repository root:
+Run from the `Samva` repository root:
 
 ```bash
 bun run validate:agent-plugin
