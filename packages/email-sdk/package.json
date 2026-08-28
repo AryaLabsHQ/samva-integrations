@@ -10,13 +10,13 @@
   ],
   "homepage": "https://samva.dev",
   "bugs": {
-    "url": "https://github.com/SamvaHQ/Samva/issues"
+    "url": "https://github.com/SamvaHQ/samva/issues"
   },
   "license": "MIT",
   "author": "Arya Labs, Inc.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SamvaHQ/Samva.git",
+    "url": "git+https://github.com/SamvaHQ/samva.git",
     "directory": "packages/email-sdk"
   },
   "files": [

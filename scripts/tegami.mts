@@ -13,7 +13,7 @@ import { tegami, type TegamiPlugin } from "tegami";
 import { runCli } from "tegami/cli";
 import { github } from "tegami/plugins/github";
 
-const REPOSITORY = "SamvaHQ/Samva";
+const REPOSITORY = "SamvaHQ/samva";
 const publicNames = new Set(["@samva/better-auth", "@samva/email-sdk"]);
 
 const releaseChecks = (): TegamiPlugin => ({
