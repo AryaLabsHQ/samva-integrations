@@ -15,7 +15,7 @@ token, so publish would never start.
 Authentication is npm trusted publishing (OIDC). The workflow sets
 `id-token: write` and does not use an `NPM_TOKEN`. Each public package on
 npmjs.com must list GitHub Actions trusted publisher
-`AryaLabsHQ/samva-integrations` with workflow filename `publish.yml` and no
+`SamvaHQ/Samva` with workflow filename `publish.yml` and no
 environment name. Do not rename `publish.yml`; npm pins that filename.
 
 This repository is public, so npm attaches provenance attestations to trusted

@@ -13,11 +13,11 @@ import { tegami, type TegamiPlugin } from "tegami";
 import { runCli } from "tegami/cli";
 import { github } from "tegami/plugins/github";
 
-const REPOSITORY = "AryaLabsHQ/samva-integrations";
+const REPOSITORY = "SamvaHQ/Samva";
 const publicNames = new Set(["@samva/better-auth", "@samva/email-sdk"]);
 
 const releaseChecks = (): TegamiPlugin => ({
-  name: "samva-integrations-release-checks",
+  name: "samva-release-checks",
   enforce: "pre",
   async afterPreflight({ plan }) {
     const shouldPublish = [...plan.packages.entries()].some(
@@ -44,7 +44,7 @@ const releaseChecks = (): TegamiPlugin => ({
 });
 
 const paper = tegami({
-  ignore: ["samva-integrations", /^@samva-examples\//],
+  ignore: ["samva", /^@samva-examples\//],
   npm: {
     client: "bun",
     updateLockFile: true,
