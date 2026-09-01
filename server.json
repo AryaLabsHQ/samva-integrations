@@ -1,0 +1,25 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "dev.samva/mcp",
+  "title": "Samva MCP",
+  "description": "Authenticated Samva email tools, including public documentation and template discovery.",
+  "version": "1.0.0",
+  "websiteUrl": "https://samva.dev/docs/developers/mcp",
+  "repository": {
+    "url": "https://github.com/SamvaHQ/samva",
+    "source": "github",
+    "id": "1280248212"
+  },
+  "icons": [
+    {
+      "src": "https://samva.dev/icon.png",
+      "mimeType": "image/png"
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.samva.dev"
+    }
+  ]
+}
